@@ -72,7 +72,7 @@ export default {
       let loadingInstance = Loading.service({ target: document.querySelector(".main") ,spinner:"el-icon-loading"});
       let that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetGeoJsonOfModelId", {
+        .get("http://172.21.212.183:8080/Knowledge/GetGeoJsonOfModelId", {
           params: {
             id: this.id
           }
@@ -304,7 +304,7 @@ export default {
       let that = this;
       let promise = new Promise(function(resolve, reject) {
         that.axios
-          .get("http://172.21.213.190:8080/Knowledge/GetLocationByIdServlet", {
+          .get("http://172.21.212.183:8080/Knowledge/GetLocationByIdServlet", {
             params: {
               id: id
             }

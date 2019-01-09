@@ -3,7 +3,7 @@
   <div>
     <knowledge-separator item="创建地点"></knowledge-separator>
     <div class="content-box">
-      <el-upload class="avatar-uploader" action="http://172.21.213.190:8080/Knowledge/UploadPhotoServlet" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+      <el-upload class="avatar-uploader" action="http://172.21.212.183:8080/Knowledge/UploadPhotoServlet" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
         <img v-if="imageUrl" :src="imageUrl" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
@@ -90,7 +90,7 @@ export default {
     if (id) {
       console.log(id);
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetLocationByIdServlet", {
+        .get("http://172.21.212.183:8080/Knowledge/GetLocationByIdServlet", {
           params: {
             id: id
           }
@@ -158,7 +158,7 @@ export default {
         var that = this;
         this.axios({
           method: "post",
-          url: "http://172.21.213.190:8080/Knowledge/AddLocationServlet",
+          url: "http://172.21.212.183:8080/Knowledge/AddLocationServlet",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
           },

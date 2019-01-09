@@ -69,7 +69,7 @@ export default {
       var that = this;
       this.axios
         .get(
-          "http://172.21.213.190:8080/Knowledge/GetResearchersByPageServlet",
+          "http://172.21.212.183:8080/Knowledge/GetResearchersByPageServlet",
           {
             params: {
               page: page
@@ -87,7 +87,7 @@ export default {
     deleteCard: function(itemId) {
       var that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/DeleteResearcherServlet", {
+        .get("http://172.21.212.183:8080/Knowledge/DeleteResearcherServlet", {
           params: {
             id: itemId
           }
@@ -112,7 +112,7 @@ export default {
         var that = this;
         this.axios
           .get(
-            "http://172.21.213.190:8080/Knowledge/SearchResearcherServlet",
+            "http://172.21.212.183:8080/Knowledge/SearchResearcherServlet",
             {
               params: {
                 text:this.searchText,

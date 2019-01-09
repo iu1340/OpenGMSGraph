@@ -64,7 +64,7 @@ export default {
     getCards: function(page) {
       var that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetModelsByPageServlet", {
+        .get("http://172.21.212.183:8080/Knowledge/GetModelsByPageServlet", {
           params: {
             page: page
           }
@@ -80,7 +80,7 @@ export default {
     deleteCard: function(itemId) {
       var that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/DeleteModelServlet", {
+        .get("http://172.21.212.183:8080/Knowledge/DeleteModelServlet", {
           params: {
             id: itemId
           }

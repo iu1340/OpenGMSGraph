@@ -3,7 +3,7 @@
     <div>
         <knowledge-separator item="创建场景"></knowledge-separator>
         <div class="content-box">
-            <el-upload class="avatar-uploader" action="http://172.21.213.190:8080/Knowledge/UploadPhotoServlet" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+            <el-upload class="avatar-uploader" action="http://172.21.212.183:8080/Knowledge/UploadPhotoServlet" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
                 <img v-if="imageUrl" :src="imageUrl" class="avatar">
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
@@ -177,7 +177,7 @@ mounted: function() {
     if (id) {
       console.log(id);
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetSceneByIdServlet", {
+        .get("http://172.21.212.183:8080/Knowledge/GetSceneByIdServlet", {
           params: {
             id: id
           }
@@ -245,7 +245,7 @@ mounted: function() {
         var that = this;
         this.axios({
           method: "post",
-          url: "http://172.21.213.190:8080/Knowledge/AddLocationServlet",
+          url: "http://172.21.212.183:8080/Knowledge/AddLocationServlet",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
           },
@@ -276,7 +276,7 @@ mounted: function() {
     getAllAgenciesInfo() {
       var that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetAllAgencyServlet")
+        .get("http://172.21.212.183:8080/Knowledge/GetAllAgencyServlet")
         .then(function(response) {
           that.agenciesInfo = response.data.agency;
         });
@@ -289,7 +289,7 @@ mounted: function() {
     getAllLocationInfo() {
       var that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetAllLocationServlet")
+        .get("http://172.21.212.183:8080/Knowledge/GetAllLocationServlet")
         .then(function(response) {
           that.locationInfo = response.data.location;
         });
@@ -302,7 +302,7 @@ mounted: function() {
     getAllCharacterInfo() {
       var that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetAllResearcherServlet")
+        .get("http://172.21.212.183:8080/Knowledge/GetAllResearcherServlet")
         .then(function(response) {
           that.characterInfo = response.data.researcher;
         });
@@ -315,7 +315,7 @@ mounted: function() {
     getAllModelInfo() {
       var that = this;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetAllModelServlet")
+        .get("http://172.21.212.183:8080/Knowledge/GetAllModelServlet")
         .then(function(response) {
           that.modelInfo = response.data.model;
         });
@@ -328,7 +328,7 @@ mounted: function() {
         var that = this;
         this.axios({
           method: "post",
-          url: "http://172.21.213.190:8080/Knowledge/AddSceneServlet",
+          url: "http://172.21.212.183:8080/Knowledge/AddSceneServlet",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
           },

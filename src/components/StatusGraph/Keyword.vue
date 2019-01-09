@@ -82,7 +82,7 @@ export default {
       let that = this;
       this.axios
         .get(
-          "http://172.21.213.190:8080/Knowledge/GetModelKeywordsRelationByIdServlet",
+          "http://172.21.212.183:8080/Knowledge/GetModelKeywordsRelationByIdServlet",
           {
             params: {
               id: this.id
@@ -100,7 +100,7 @@ export default {
       let that = this;
       this.axios
         .get(
-          "http://172.21.213.190:8080/Knowledge/GetAgencyKeywordsRelationByIdServlet",
+          "http://172.21.212.183:8080/Knowledge/GetAgencyKeywordsRelationByIdServlet",
           {
             params: {
               id: this.id
@@ -118,7 +118,7 @@ export default {
       let that = this;
       this.axios
         .get(
-          "http://172.21.213.190:8080/Knowledge/GetResearcherKeywordsRelationByIdServlet",
+          "http://172.21.212.183:8080/Knowledge/GetResearcherKeywordsRelationByIdServlet",
           {
             params: {
               id: this.id

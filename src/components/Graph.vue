@@ -470,7 +470,7 @@ export default {
   methods: {
     getYearRange() {
       var getYearRangeAxios = this.axios.get(
-        "http://172.21.213.190:8080/Knowledge/GetGraphTimeRangeServlet"
+        "http://172.21.212.183:8080/Knowledge/GetGraphTimeRangeServlet"
       );
       return getYearRangeAxios;
     },
@@ -567,7 +567,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.213.190:8080/Knowledge/GetModelGraphByYearServlet",
+            "http://172.21.212.183:8080/Knowledge/GetModelGraphByYearServlet",
             {
               params: {
                 year: year
@@ -591,7 +591,7 @@ export default {
         let that = this;
         this.axios
           .get(
-            "http://172.21.213.190:8080/Knowledge/GetModelGraphBySearchTextServlet",
+            "http://172.21.212.183:8080/Knowledge/GetModelGraphBySearchTextServlet",
             {
               params: {
                 type: this.searchType,
@@ -622,7 +622,7 @@ export default {
       let that = this;
       this.loadFlag = true;
       this.axios
-        .get("http://172.21.213.190:8080/Knowledge/GetGraphByYearServlet", {
+        .get("http://172.21.212.183:8080/Knowledge/GetGraphByYearServlet", {
           params: {
             year: year
           }
@@ -1137,7 +1137,7 @@ export default {
           let orderListPromise = new Promise(function(resolve, reject) {
             that.axios
               .get(
-                "http://172.21.213.190:8080/Knowledge/GetOrderListByModelIdServlet",
+                "http://172.21.212.183:8080/Knowledge/GetOrderListByModelIdServlet",
                 {
                   params: {
                     id: info.id
@@ -1254,7 +1254,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.213.190:8080/Knowledge/GetUseCountByYearAndIdServlet",
+            "http://172.21.212.183:8080/Knowledge/GetUseCountByYearAndIdServlet",
             {
               params: { year: year, id: id, category: category }
             }
@@ -1389,7 +1389,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.213.190:8080/Knowledge/GetUseCountryCountByYearAndIdServlet",
+            "http://172.21.212.183:8080/Knowledge/GetUseCountryCountByYearAndIdServlet",
             {
               params: { year: year, id: id, category: category }
             }
@@ -1419,7 +1419,7 @@ export default {
       });
       this.axios
         .get(
-          "http://172.21.213.190:8080/Knowledge/GetSceneByTypeAndIdServlet",
+          "http://172.21.212.183:8080/Knowledge/GetSceneByTypeAndIdServlet",
           {
             params: {
               type: info.subType,

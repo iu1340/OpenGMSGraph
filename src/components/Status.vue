@@ -327,22 +327,22 @@ export default {
       let url = "";
       switch (category) {
         case "model":
-          url = "http://172.21.213.190:8080/Knowledge/GetModelByIdServlet";
+          url = "http://172.21.212.183:8080/Knowledge/GetModelByIdServlet";
           this.basicInfo.class = "fa fa-globe fa-3x"
           this.basicInfo.color = "#98df8a"
           break;
         case "researcher":
-          url = "http://172.21.213.190:8080/Knowledge/GetResearcherByIdServlet";
+          url = "http://172.21.212.183:8080/Knowledge/GetResearcherByIdServlet";
           this.basicInfo.class = "fa fa-user-circle-o fa-3x"
           this.basicInfo.color = "#9467bd"
           break;
         case "agency":
-          url = "http://172.21.213.190:8080/Knowledge/GetAgencyByIdServlet";
+          url = "http://172.21.212.183:8080/Knowledge/GetAgencyByIdServlet";
           this.basicInfo.class = "fa fa-institution fa-3x"
           this.basicInfo.color = "#d62728"
           break;
         case "location":
-          url = "http://172.21.213.190:8080/Knowledge/GetLocationByIdServlet";
+          url = "http://172.21.212.183:8080/Knowledge/GetLocationByIdServlet";
           this.basicInfo.class = "fa fa-map-marker fa-3x"
           this.basicInfo.color = "#ff9896"
           break;
@@ -703,7 +703,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.213.190:8080/Knowledge/GetResearcherByIdServlet",
+            "http://172.21.212.183:8080/Knowledge/GetResearcherByIdServlet",
             {
               params: {
                 id: row
@@ -720,7 +720,7 @@ export default {
       let that = this;
       let promise = new Promise(function(resolve, reject) {
         that.axios
-          .get("http://172.21.213.190:8080/Knowledge/GetAgencyByIdServlet", {
+          .get("http://172.21.212.183:8080/Knowledge/GetAgencyByIdServlet", {
             params: {
               id: row
             }
