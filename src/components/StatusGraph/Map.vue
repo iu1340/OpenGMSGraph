@@ -6,12 +6,12 @@
         type="primary"
         :plain="mapActive!=='d3'"
         @click="mapActiveHandle('d3')"
-      >三维地图</el-button>
+      >3D Map</el-button>
       <el-button
         type="primary"
         :plain="mapActive!=='leaflet'"
         @click="mapActiveHandle('leaflet')"
-      >二维地图</el-button>
+      >2D Map</el-button>
     </div>
     <div
       id="d3-content"
@@ -28,7 +28,8 @@
 </template>
 
 <script>
-import { Loading } from 'element-ui';
+var GJV = require("geojson-validation");
+import { Loading } from "element-ui";
 import * as d3 from "d3v4";
 // import worldData from "@/assets/world.json";
 import landGeojson from "@/assets/ne_json/ne_50m_admin_0_countries.json";
@@ -53,7 +54,9 @@ export default {
       kclass: [],
       map: null,
       zoom: 2,
-      center: L.latLng(0, 0)
+      center: L.latLng(0, 0),
+      // color: [ "#6DCE9E", "#60B58B","#FF7F24","#FF4500" ]
+      color: [ "#60B58B", "#FF7F24","#FF4500","#FF4500" ]
     };
   },
 
@@ -69,14 +72,20 @@ export default {
 
   methods: {
     getLocationInfo() {
-      let loadingInstance = Loading.service({ target: document.querySelector(".main") ,spinner:"el-icon-loading"});
+      let loadingInstance = Loading.service({
+        target: document.querySelector(".main"),
+        spinner: "el-icon-loading"
+      });
       let that = this;
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/GetGeoJsonOfModelId", {
-          params: {
-            id: this.id
+        .get(
+          "http://172.21.213.242:8080//Knowledge/GetGeoJsonOfModelIdServlet",
+          {
+            params: {
+              id: this.id
+            }
           }
-        })
+        )
         .then(function(response) {
           if (response.status === 200) {
             that.locationOfModel = response.data;
@@ -125,6 +134,7 @@ export default {
         });
     },
     createLeafletMap() {
+      let that = this;
       this.map = L.map("vue-leaflet").setView([0, 0], 2);
       // L.tileLayer(this.url).addTo(this.map);
       // L.tileLayer(
@@ -148,25 +158,31 @@ export default {
         fillOpacity: 0.8
       };
       for (let obj of this.locationGeojson) {
-        let weight = 0.3;
-        for (let i = 0; i < this.locationOfModel.length; i++) {
-          let location = this.locationOfModel[i];
-          if (location.id === obj.id) {
-            let weight = this.getWeight(location.count);
-            weight = weight / 10;
-            break;
+        if (GJV.valid(obj.geojson)) {
+          let weight = 0.3;
+          let currentColor = that.color[0];
+          for (let i = 0; i < this.locationOfModel.length; i++) {
+            let location = this.locationOfModel[i];
+            if (location.id === obj.id) {
+              let weight = this.getWeight(location.count);
+              
+              currentColor = that.color[weight-3];
+              weight = weight / 10;
+              break;
+            }
           }
+          L.geoJSON(obj.geojson, {
+            style: {
+              color: currentColor,
+              weight: weight
+            },
+            pointToLayer: function(feature, latlng) {
+              geojsonMarkerOptions.radius = weight * 10;
+              geojsonMarkerOptions.fillColor = currentColor;
+              return L.circleMarker(latlng, geojsonMarkerOptions);
+            }
+          }).addTo(this.map).bindPopup(obj.name);
         }
-        L.geoJSON(obj.geojson, {
-          style: {
-            color: "#66b1ff",
-            weight: weight
-          },
-          pointToLayer: function(feature, latlng) {
-            geojsonMarkerOptions.radius = weight * 10;
-            return L.circleMarker(latlng, geojsonMarkerOptions);
-          }
-        }).addTo(this.map);
       }
     },
     createD3Map() {
@@ -191,7 +207,7 @@ export default {
             .drag()
             .on("start", dragstarted)
             .on("drag", dragged)
-            // .on("end", dragended)
+          // .on("end", dragended)
         );
 
       var projection = d3
@@ -215,27 +231,32 @@ export default {
       }
 
       function drawLocationGeoJson(obj, fill) {
-        for (let i = 0; i < that.locationOfModel.length; i++) {
-          let location = that.locationOfModel[i];
-          if (location.id === obj.id) {
-            let weight = that.getWeight(location.count);
-            context.lineWidth = weight / 10;
-            break;
+        if (GJV.valid(obj.geojson)) {
+          context.beginPath();
+          let currentColor = that.color[0];
+          for (let i = 0; i < that.locationOfModel.length; i++) {
+            let location = that.locationOfModel[i];
+            if (location.id === obj.id) {
+              let weight = that.getWeight(location.count);
+              currentColor = that.color[weight-3];
+              context.lineWidth = weight / 10;
+              break;
+            }
           }
+          context.strokeStyle = currentColor;
+          context.fillStyle = currentColor;
+          
+          // console.log(obj);
+          geoGenerator({
+            type: "FeatureCollection",
+            features: [{ type: "Feature", geometry: obj.geojson }]
+          });
+          
+          context.stroke();
+          // if (obj.geojson.type==="Polygon") {
+          //   context.fill();
+          // }
         }
-        context.strokeStyle = "#66b1ff";
-        context.fillStyle = "#66b1ff";
-
-        context.beginPath();
-        // console.log(obj);
-        geoGenerator({
-          type: "FeatureCollection",
-          features: [{ type: "Feature", geometry: obj.geojson }]
-        });
-        if (fill) {
-          context.fill();
-        }
-        context.stroke();
       }
 
       function update(r) {
@@ -304,7 +325,7 @@ export default {
       let that = this;
       let promise = new Promise(function(resolve, reject) {
         that.axios
-          .get("http://172.21.212.183:8080/Knowledge/GetLocationByIdServlet", {
+          .get("http://172.21.213.242:8080//Knowledge/GetLocationByIdServlet", {
             params: {
               id: id
             }
@@ -325,7 +346,7 @@ export default {
       }
       // int numclass;
       var numdata = data.length;
-      if(numdata<=0){
+      if (numdata <= 0) {
         return [];
       }
       data.sort(sortNumber); //先排序
@@ -457,6 +478,7 @@ export default {
   height: 100%;
   width: 100%;
   position: relative;
+  background: #ffffff
 }
 .button-group {
   position: absolute;
@@ -466,7 +488,7 @@ export default {
 }
 </style>
 <style>
-.el-icon-loading{
-  font-size:30px
+.el-icon-loading {
+  font-size: 30px;
 }
 </style>

@@ -6,13 +6,13 @@
         type="primary"
         :plain="graphActive!='history'"
         @click="handleBtn('history')"
-      >研究趋势</el-button>
+      >Research Trend</el-button>
       <el-button
         type="primary"
         :plain="graphActive!='country'"
         @click="handleBtn('country')"
         v-if="type==='model'"
-      >研究国家</el-button>
+      >Research Country</el-button>
     </div>
     <div
       class="historyPanel"
@@ -31,7 +31,7 @@
             :id="item.id"
           >
             <i class='fa fa-user-circle fa-fw'></i>
-            {{item.name}}
+            {{item.name.trim()}}
           </li>
         </ul>
         <h5>Agency Order</h5>
@@ -92,7 +92,7 @@ export default {
   methods: {
     getYearRange() {
       var getYearRangeAxios = this.axios.get(
-        "http://172.21.212.183:8080/Knowledge/GetGraphTimeRangeServlet"
+        "http://172.21.213.242:8080/Knowledge/GetGraphYearRangeServlet"
       );
       return getYearRangeAxios;
     },
@@ -117,7 +117,7 @@ export default {
           let orderListPromise = new Promise(function(resolve, reject) {
             that.axios
               .get(
-                "http://172.21.212.183:8080/Knowledge/GetOrderListByModelIdServlet",
+                "http://172.21.213.242:8080//Knowledge/GetOrderListByModelIdServlet",
                 {
                   params: {
                     id: that.id
@@ -141,96 +141,97 @@ export default {
             document.getElementById("historyGraph").style.width =
               "100%!important";
           }
+          this.$nextTick(function() {
+            that.createGraph();
+          });
+
           break;
         default:
           that.researcherOrder = [];
           that.agencyOrder = [];
+          that.createGraph();
       }
-
+    },
+    createGraph() {
+      let that = this;
       let min = this.yearRange.min * 1;
       let max = this.yearRange.max * 1;
       let xAxisData = [];
       let seriesData = [];
+      let promises = [];
       for (let i = min; i <= max; i++) {
         let year = i + "";
-        let data = await this.getUseCount(year, that.id, that.type);
-        if (i === min) {
-          this.historyGraph = this.$echarts.init(
-            document.getElementById("historyGraph")
-          );
-          this.historyGraph.showLoading();
-        }
         xAxisData.push(year);
-        seriesData.push(data.count);
+        let promise = this.getUseCount(year, that.id, that.type);
+        promises.push(promise);
+        this.historyGraph = this.$echarts.init(
+          document.getElementById("historyGraph")
+        );
+        this.historyGraph.showLoading();
       }
-
-      let option = {
-        title: {
-          text: "count by year",
-          left: "center"
-        },
-        tooltip: {
-          trigger: "axis",
-          axisPointer: {
-            type: "cross",
-            animation: false,
-            label: {
-              backgroundColor: "#ccc",
-              borderColor: "#aaa",
-              borderWidth: 1,
-              shadowBlur: 0,
-              shadowOffsetX: 0,
-              shadowOffsetY: 0,
-              textStyle: {
-                color: "#222"
+      Promise.all(promises).then(function(result) {
+        for (let obj of result) {
+          seriesData.push(obj.count);
+        }
+        let option = {
+          title: {
+            text: "count by year",
+            left: "center"
+          },
+          tooltip: {
+            trigger: "axis",
+            axisPointer: {
+              type: "cross",
+              animation: false,
+              label: {
+                backgroundColor: "#ccc",
+                borderColor: "#aaa",
+                borderWidth: 1,
+                shadowBlur: 0,
+                shadowOffsetX: 0,
+                shadowOffsetY: 0,
+                textStyle: {
+                  color: "#222"
+                }
               }
+            },
+            formatter: function(params) {
+              return params[0].name + "<br />" + params[0].value;
             }
           },
-          formatter: function(params) {
-            return params[0].name + "<br />" + params[0].value;
-          }
-        },
-        grid: {
-          left: "1%",
-          right: "1%",
-          bottom: "1%",
-          top: "60",
-          containLabel: true
-        },
-        xAxis: {
-          type: "category",
-          data: xAxisData
-        },
-        yAxis: {
-          type: "value"
-        },
-        series: [
-          {
-            data: seriesData,
-            type: "line",
-            smooth: true
-          }
-        ]
-      };
+          grid: {
+            left: "1%",
+            right: "1%",
+            bottom: "1%",
+            top: "60",
+            containLabel: true
+          },
+          xAxis: {
+            type: "category",
+            data: xAxisData
+          },
+          yAxis: {
+            type: "value"
+          },
+          series: [
+            {
+              data: seriesData,
+              type: "line",
+              smooth: true
+            }
+          ]
+        };
 
-      // setTimeout(function() {
-      //   that.historyGraph = that.$echarts.init(
-      //     document.getElementById("historyGraph")
-      //   );
-      //   that.historyGraph.showLoading();
-      //   that.historyGraph.hideLoading();
-      //   that.historyGraph.setOption(option);
-      // }, 500);
-
-      this.historyGraph.hideLoading();
-      this.historyGraph.setOption(option);
+        that.historyGraph.hideLoading();
+        that.historyGraph.setOption(option);
+      });
     },
     getUseCount(year, id, category) {
       let that = this;
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/GetUseCountByYearAndIdServlet",
+            "http://172.21.213.242:8080//Knowledge/GetUseCountByYearAndIdServlet",
             {
               params: { year: year, id: id, category: category }
             }
@@ -265,12 +266,24 @@ export default {
       let promises = [];
       for (let i = min; i <= max; i++) {
         promises.push(this.getUseCountry(i, this.id, this.type));
+        timeLineData.push({
+              value: i + "",
+              tooltip: {
+                formatter: function(params) {
+                  // console.log(params);
+                  return params.name;
+                }
+              },
+              // symbol: "diamond",
+              symbolSize: 18
+            });
       }
       this.countryGraph = this.$echarts.init(
         document.getElementById("countryGraph")
       );
       this.countryGraph.showLoading();
       Promise.all(promises).then(result => {
+        console.log(result)
         let max = 0;
         for (let i = 0; i < result.length; i++) {
           let data = result[i];
@@ -284,8 +297,10 @@ export default {
         }
         for (let i = 0; i < result.length; i++) {
           let data = result[i];
-          if (Object.keys(data).length > 0) {
-            let countryValue = [];
+          // if (Object.keys(data).length > 0) {
+            
+          // }
+          let countryValue = [];
             for (let j = 0; j < countries.length; j++) {
               let country = countries[j];
               // if(country==="United States of America"){
@@ -297,24 +312,14 @@ export default {
               }
               countryValue.push(obj);
             }
-            timeLineData.push({
-              value: i + "",
-              tooltip: {
-                formatter: function(params) {
-                  console.log(params)
-                  return params.name;
-                }
-              },
-              // symbol: "diamond",
-              symbolSize: 18
-            });
+            
             let currentYearOption = {
               visualMap: {
                 left: "right",
                 min: 0,
                 max: max,
                 inRange: {
-                  color: ["#eeeeee","#50a3ba", "#eac736", "#d94e5d"]
+                  color: ["#eeeeee", "#50a3ba", "#eac736", "#d94e5d"]
                 },
                 text: ["High", "Low"], // 文本，默认为数值文本
                 calculable: true
@@ -337,7 +342,6 @@ export default {
               ]
             };
             allYearData.push(currentYearOption);
-          }
         }
 
         let option = {
@@ -368,7 +372,7 @@ export default {
           },
           options: allYearData
         };
-
+        console.log(option)
         this.countryGraph.hideLoading();
         this.countryGraph.setOption(option);
       });
@@ -378,7 +382,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/GetUseCountryCountByYearAndIdServlet",
+            "http://172.21.213.242:8080//Knowledge/GetUseCountryCountByYearAndIdServlet",
             {
               params: { year: year, id: id, category: category }
             }

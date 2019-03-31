@@ -1,10 +1,10 @@
 <!--  -->
 <template>
   <div>
-    <knowledge-separator item="人物"></knowledge-separator>
+    <knowledge-separator item="Character"></knowledge-separator>
     <div class="tool-panel">
-      <el-button type="success" @click="$router.push('/system/createCharacter')">创建</el-button>
-      <el-input placeholder="请输入内容" prefix-icon="el-icon-search" v-model="searchText" @keyup.enter.native="searchEnterFun">
+      <el-button type="success" @click="$router.push('/system/createCharacter')">Create</el-button>
+      <el-input placeholder="Please enter search text" prefix-icon="el-icon-search" v-model="searchText" @keyup.enter.native="searchEnterFun">
       </el-input>
     </div>
     <div class="card-box-content">
@@ -18,10 +18,10 @@
           <div style="float: right;">
             <el-button class="card-button" type="warning" icon="el-icon-edit"  @click="$router.push('/system/editCharacter/'+item.id)"></el-button>
             <el-popover placement="top" width="160" v-model="item.deleteVisible">
-              <p>确定删除该人物条目？</p>
+              <p>Are you sure you want to delete the Character entry?</p>
               <div style="text-align: right; margin: 0">
-                <el-button size="mini" type="text" @click="item.deleteVisible = false">取消</el-button>
-                <el-button type="primary" size="mini" @click="item.deleteVisible = false;deleteCard(item.id)">确定</el-button>
+                <el-button size="mini" type="text" @click="item.deleteVisible = false">Cancel</el-button>
+                <el-button type="primary" size="mini" @click="item.deleteVisible = false;deleteCard(item.id)">Ok</el-button>
               </div>
               <el-button class="card-button" type="danger" icon="el-icon-delete" slot="reference"></el-button>
             </el-popover>
@@ -69,7 +69,7 @@ export default {
       var that = this;
       this.axios
         .get(
-          "http://172.21.212.183:8080/Knowledge/GetResearchersByPageServlet",
+          "http://172.21.213.33:8080//Knowledge/GetResearchersByPageServlet",
           {
             params: {
               page: page
@@ -87,7 +87,7 @@ export default {
     deleteCard: function(itemId) {
       var that = this;
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/DeleteResearcherServlet", {
+        .get("http://172.21.213.33:8080//Knowledge/DeleteResearcherServlet", {
           params: {
             id: itemId
           }
@@ -112,7 +112,7 @@ export default {
         var that = this;
         this.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/SearchResearcherServlet",
+            "http://172.21.213.33:8080//Knowledge/SearchResearcherServlet",
             {
               params: {
                 text:this.searchText,

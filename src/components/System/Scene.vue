@@ -65,7 +65,7 @@ export default {
     getCards: function(page) {
       var that = this;
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/GetSceneByPageServlet", {
+        .get("http://172.21.213.242:8080//Knowledge/GetSceneByPageServlet", {
           params: {
             page: page
           }
@@ -81,7 +81,7 @@ export default {
     deleteCard: function(itemId) {
       var that = this;
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/DeleteSceneServlet", {
+        .get("http://172.21.213.242:8080//Knowledge/DeleteSceneServlet", {
           params: {
             id: itemId
           }

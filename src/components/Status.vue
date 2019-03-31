@@ -8,7 +8,8 @@
       <el-aside
         width="300px"
         style="background-color: rgb(238, 241, 246);"
-        class="scrollbar">
+        class="scrollbar"
+      >
         <div class="info">
           <div>
             <i
@@ -36,7 +37,8 @@
         <div>
           <el-menu
             default-active="1"
-            class="el-menu-vertical">
+            class="el-menu-vertical"
+          >
             <el-menu-item
               index="1"
               class="el-menu-item"
@@ -186,7 +188,7 @@
                 </div>
               </div>
               <div class="desc">
-                <b>DESC:</b>{{currentEvent.detail}}
+                <b>DESC:</b>{{currentEvent.desc}}
               </div>
 
               <div
@@ -194,7 +196,8 @@
                 style="margin-top:10px"
               >
                 <b>From Status:</b>
-                {{currentEvent.fromStatusInfo.name+ " "+ currentEvent.fromStatusInfo.version}}
+                <span v-if="currentEvent.fromStatusInfo.version">{{currentEvent.fromStatusInfo.name+ " "+ currentEvent.fromStatusInfo.version}}</span>
+                <span v-if="!currentEvent.fromStatusInfo.version">{{currentEvent.fromStatusInfo.name}}</span>
               </div>
 
               <div
@@ -202,7 +205,8 @@
                 style="margin-top:10px"
               >
                 <b>To Status:</b>
-                {{currentEvent.toStatusInfo.name+ " "+ currentEvent.toStatusInfo.version}}
+                <span v-if="currentEvent.toStatusInfo.version">{{currentEvent.toStatusInfo.name+ " "+ currentEvent.toStatusInfo.version}}</span>
+                <span v-if="!currentEvent.toStatusInfo.version">{{currentEvent.toStatusInfo.name}}</span>
               </div>
             </template>
           </div>
@@ -215,18 +219,18 @@
               <el-button
                 type="primary"
                 :plain="btnActive!='packing'"
-                @click="graphDirectionHandle('packing')"
-              >图表展示</el-button>
+                @click="graphDirectionHandle('packing')" style="width:140px"
+              >Graph View</el-button>
               <el-button
                 type="primary"
                 :plain="btnActive!='vertical'"
-                @click="graphDirectionHandle('vertical')"
-              >垂直展示</el-button>
+                @click="graphDirectionHandle('vertical')" style="width:140px"
+              >Vertical View</el-button>
               <el-button
                 type="primary"
                 :plain="btnActive!='horizontal'"
-                @click="graphDirectionHandle('horizontal')"
-              >水平展示</el-button>
+                @click="graphDirectionHandle('horizontal')" style="width:140px"
+              >Horizontal View</el-button>
             </div>
           </div>
         </template>
@@ -327,24 +331,25 @@ export default {
       let url = "";
       switch (category) {
         case "model":
-          url = "http://172.21.212.183:8080/Knowledge/GetModelByIdServlet";
-          this.basicInfo.class = "fa fa-globe fa-3x"
-          this.basicInfo.color = "#98df8a"
+          url = "http://172.21.213.242:8080//Knowledge/GetModelByIdServlet";
+          this.basicInfo.class = "fa fa-globe fa-3x";
+          this.basicInfo.color = "#98df8a";
           break;
         case "researcher":
-          url = "http://172.21.212.183:8080/Knowledge/GetResearcherByIdServlet";
-          this.basicInfo.class = "fa fa-user-circle-o fa-3x"
-          this.basicInfo.color = "#9467bd"
+          url =
+            "http://172.21.213.242:8080//Knowledge/GetResearcherByIdServlet";
+          this.basicInfo.class = "fa fa-user-circle-o fa-3x";
+          this.basicInfo.color = "#9467bd";
           break;
         case "agency":
-          url = "http://172.21.212.183:8080/Knowledge/GetAgencyByIdServlet";
-          this.basicInfo.class = "fa fa-institution fa-3x"
-          this.basicInfo.color = "#d62728"
+          url = "http://172.21.213.242:8080//Knowledge/GetAgencyByIdServlet";
+          this.basicInfo.class = "fa fa-institution fa-3x";
+          this.basicInfo.color = "#d62728";
           break;
         case "location":
-          url = "http://172.21.212.183:8080/Knowledge/GetLocationByIdServlet";
-          this.basicInfo.class = "fa fa-map-marker fa-3x"
-          this.basicInfo.color = "#ff9896"
+          url = "http://172.21.213.242:8080//Knowledge/GetLocationByIdServlet";
+          this.basicInfo.class = "fa fa-map-marker fa-3x";
+          this.basicInfo.color = "#ff9896";
           break;
       }
       if (url.length > 0) {
@@ -421,8 +426,8 @@ export default {
       for (let i = 0; i < this.status.length; i++) {
         let status = this.status[i];
         let label = status.name;
-        if(status.version){
-          label = label+ " " + status.version 
+        if (status.version) {
+          label = label + " " + status.version;
         }
         g.setNode(status.id, {
           labelType: "html",
@@ -435,11 +440,15 @@ export default {
 
       for (let i = 0; i < events.length; i++) {
         let event = events[i];
+        let className = event.type;
+        className = className.toLowerCase();
+        className = className.replace(/\s+/g, "_");
+        console.log(event);
         g.setNode(event.id, {
           shape: "ellipse",
           labelType: "html",
           label: "<p>" + event.name + "(" + event.startTime + ")" + "</p>",
-          class: event.type
+          class: className
         });
       }
 
@@ -470,14 +479,15 @@ export default {
 
       render(inner, g);
 
-      console.log(inner.selectAll("g.node"));
       inner.selectAll("g.node").on("click", function(v) {
         let node = g.node(v);
         if (node.class === "status") {
-          for (let i = 0; i < that.status.length; i++) {
-            that.infoPanelType = "status";
-            that.showStatusPanel(v);
-          }
+          // for (let i = 0; i < that.status.length; i++) {
+          //   that.infoPanelType = "status";
+          //   that.showStatusPanel(v);
+          // }
+          that.infoPanelType = "status";
+          that.showStatusPanel(v);
         } else {
           that.infoPanelType = "event";
           that.showEventPanel(v, events);
@@ -598,13 +608,15 @@ export default {
         .append("text")
         .attr("class", "name")
         .style("font-size", function(d) {
-          let nameArray = d.data.name.split(/(?=[A-Z][^A-Z])/g);
-          let size = nameArray.length;
-          if (size < 4) {
-            size = 4;
+          if (d.data.name) {
+            let nameArray = d.data.name.split(/(?=[A-Z][^A-Z])/g);
+            let size = nameArray.length;
+            if (size < 4) {
+              size = 4;
+            }
+            let h = d.r / size;
+            return h + "px";
           }
-          let h = d.r / size;
-          return h + "px";
         });
 
       // vText
@@ -635,23 +647,27 @@ export default {
         .attr("clip-path", d => d.data.id)
         .selectAll("tspan")
         .data(function(d) {
-          let nameArray = d.data.name.split(/(?=[A-Z][^A-Z])/g);
-          let size = nameArray.length;
-          if (size < 4) {
-            size = 4;
-          }
-          let array = [];
-          for (let i = 0; i < nameArray.length; i++) {
-            let name = nameArray[i];
-            var obj = {
-              name: name,
-              x: d.x,
-              y: d.y + (d.r / size) * (i - 1)
-            };
-            array.push(obj);
-          }
+          if (d.data.name) {
+            let nameArray = d.data.name.split(/(?=[A-Z][^A-Z])/g);
+            let size = nameArray.length;
+            if (size < 4) {
+              size = 4;
+            }
+            let array = [];
+            for (let i = 0; i < nameArray.length; i++) {
+              let name = nameArray[i];
+              var obj = {
+                name: name,
+                x: d.x,
+                y: d.y + (d.r / size) * (i - 1)
+              };
+              array.push(obj);
+            }
 
-          return array;
+            return array;
+          } else {
+            return [];
+          }
         })
         .enter()
         .append("tspan")
@@ -703,7 +719,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/GetResearcherByIdServlet",
+            "http://172.21.213.242:8080//Knowledge/GetResearcherByIdServlet",
             {
               params: {
                 id: row
@@ -720,7 +736,7 @@ export default {
       let that = this;
       let promise = new Promise(function(resolve, reject) {
         that.axios
-          .get("http://172.21.212.183:8080/Knowledge/GetAgencyByIdServlet", {
+          .get("http://172.21.213.242:8080//Knowledge/GetAgencyByIdServlet", {
             params: {
               id: row
             }
@@ -744,29 +760,33 @@ export default {
       currentStatus.agencyPage = 1;
       currentStatus.researcherPage = 1;
       let researchers = [];
-      for (let i = 0; i < currentStatus.researchers.length; i++) {
-        let researcherId = currentStatus.researchers[i];
-        let name = await this.formatterResearcher(researcherId);
-        if (name !== "") {
-          let obj = {
-            id: researcherId,
-            name: name
-          };
-          researchers.push(obj);
+      if (currentStatus.researchers) {
+        for (let i = 0; i < currentStatus.researchers.length; i++) {
+          let researcherId = currentStatus.researchers[i];
+          let name = await this.formatterResearcher(researcherId);
+          if (name !== "") {
+            let obj = {
+              id: researcherId,
+              name: name
+            };
+            researchers.push(obj);
+          }
         }
+        currentStatus.researchersInfo = researchers;
       }
-      currentStatus.researchersInfo = researchers;
 
       let agencies = [];
-      for (let i = 0; i < currentStatus.agencies.length; i++) {
-        let agencyId = currentStatus.agencies[i];
-        let name = await this.formatterAgency(agencyId);
-        if (name !== "") {
-          let obj = {
-            id: agencyId,
-            name: name
-          };
-          agencies.push(obj);
+      if (currentStatus.agencies) {
+        for (let i = 0; i < currentStatus.agencies.length; i++) {
+          let agencyId = currentStatus.agencies[i];
+          let name = await this.formatterAgency(agencyId);
+          if (name !== "") {
+            let obj = {
+              id: agencyId,
+              name: name
+            };
+            agencies.push(obj);
+          }
         }
       }
 
@@ -1133,23 +1153,31 @@ text {
   stroke-width: 1.5px;
 }
 
-.nodes .Create {
+.nodes .create,
+.nodes .started {
   fill: #96dd7b;
 }
 
-.nodes .Improve {
+.nodes .improve,
+.nodes .agencychange {
   fill: #15d1ec;
 }
 
-.nodes .Improve {
-  fill: #15d1ec;
-}
-
-.nodes .NameChange {
+.nodes .namechange,
+.nodes .titlechange {
   fill: #ffe35d;
 }
-.nodes .Merge {
-  fill: #5fa9ff;
+
+.nodes .merge {
+  fill: #375a7d;
+}
+
+.nodes .upgrade {
+  fill: #ff6138;
+}
+
+.nodes .locationchange {
+  fill: #fab496;
 }
 
 .nodes .status {

@@ -1,55 +1,55 @@
 <!--  -->
 <template>
   <div>
-    <knowledge-separator item="创建人物"></knowledge-separator>
+    <knowledge-separator :item="item"></knowledge-separator>
     <div class="content-box">
-      <el-upload class="avatar-uploader" action="http://172.21.212.183:8080/Knowledge/UploadPhotoServlet" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+      <el-upload class="avatar-uploader" action="http://172.21.213.33:8080//Knowledge/UploadPhotoServlet" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
         <img v-if="imageUrl" :src="imageUrl" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
 
       <div class="form-box">
         <el-form ref="characterForm" class="characterForm" :model="characterForm" :rules="rules" label-width="110px" label-position="right">
-          <el-form-item label="人物名称" prop="name" required>
+          <el-form-item label="Name" prop="name" required>
             <el-input v-model="characterForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="人物描述" prop="desc">
+          <el-form-item label="Desc" prop="desc">
             <el-input type="textarea" v-model="characterForm.desc"></el-input>
           </el-form-item>
-          <el-form-item label="人物默认状态" prop="initStatusId">
-            <el-select v-model="characterForm.initStatusId" filterable placeholder="请选择状态，可搜索">
+          <el-form-item label="Init Status" prop="initStatusId">
+            <el-select v-model="characterForm.initStatusId" filterable placeholder="Please Select Status">
               <el-option v-for="item in characterForm.status" :key="item.id" :label="item.id" :value="item.id">
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="人物状态" prop="status">
+          <el-form-item label="Status" prop="status">
             <el-table class="statusTable" :data="characterForm.status" border style="width: 100%">
               <el-table-column type="expand">
                 <template slot-scope="props">
                   <el-form label-position="left" inline class="status-table-expand" v-for="(item, index) in props.row.agencies" :key="index">
-                    <el-form-item label="机构ID">
+                    <el-form-item label="Agency ID">
                       <span>{{ getAgencyNameById(item.agencyId) }}</span>
                     </el-form-item>
-                    <el-form-item label="职称">
+                    <el-form-item label="Title">
                       <span>{{ item.title }}</span>
                     </el-form-item>
-                    <el-form-item label="开始时间">
+                    <el-form-item label="Start Time">
                       <span>{{ item.startTime }}</span>
                     </el-form-item>
-                    <el-form-item label="结束时间">
+                    <el-form-item label="End Time">
                       <span>{{ item.endTime }}</span>
                     </el-form-item>
                   </el-form>
                 </template>
               </el-table-column>
               <el-table-column prop="id" label="ID"></el-table-column>
-              <el-table-column prop="name" label="名称"></el-table-column>
-              <el-table-column prop="desc" label="描述"></el-table-column>
+              <el-table-column prop="name" label="Name"></el-table-column>
+              <el-table-column prop="desc" label="Desc"></el-table-column>
               <!-- <el-table-column prop="agencies" label="机构"></el-table-column> -->
-              <el-table-column fixed="right" label="操作" width="100">
+              <el-table-column fixed="right" label="Tool" width="100">
                 <template slot-scope="scope">
-                  <el-button @click="editStatus(scope.row)" type="text" size="small">编辑</el-button>
-                  <el-button @click="deleteStaus(scope.row)" type="text" size="small">删除</el-button>
+                  <el-button @click="editStatus(scope.row)" type="text" size="small">Edit</el-button>
+                  <el-button @click="deleteStaus(scope.row)" type="text" size="small">Delete</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -58,71 +58,71 @@
 
         <div style="text-align:right">
           <!-- <el-button @click="createDialogVisible = false">取 消</el-button> -->
-          <el-button type="primary" @click="addCharacter('characterForm');">保 存 人 物</el-button>
+          <el-button type="primary" @click="addCharacter('characterForm');">Save</el-button>
         </div>
 
-        <label>添加人物状态</label>
+        <label>Add Status</label>
         <div class="addStatusBox">
           <el-form ref="statusForm" class="statusForm" :model="statusForm" :rules="statusRules">
-            <el-button type="warning" @click="openEventModal()">增加事件</el-button>
-            <label>任务状态都需要以事件触发，所以首先要<b style="color:red">增加事件</b></label>
-            <el-form-item label="人物事件" prop="events">
+            <el-button type="warning" @click="openEventModal()">Add Event</el-button>
+            <label>Task states need to be triggered by events,<b style="color:red">Add Event</b> first</label>
+            <el-form-item label="Events" prop="events">
               <el-table class="eventTable" :data="statusForm.events" border style="width: 100%">
                 <el-table-column prop="id" label="ID"></el-table-column>
-                <el-table-column prop="name" label="名称"></el-table-column>
-                <el-table-column prop="type" label="类型" :formatter="formatEventTypeByType"></el-table-column>
-                <el-table-column prop="detail" label="描述"></el-table-column>
-                <el-table-column prop="fromStatus" label="起始状态"></el-table-column>
-                <el-table-column prop="startTime" label="起始时间"></el-table-column>
-                <el-table-column prop="endTime" label="结束时间"></el-table-column>
+                <el-table-column prop="name" label="Name"></el-table-column>
+                <el-table-column prop="type" label="Type" :formatter="formatEventTypeByType"></el-table-column>
+                <el-table-column prop="detail" label="Desc"></el-table-column>
+                <el-table-column prop="fromStatus" label="Start Status"></el-table-column>
+                <el-table-column prop="startTime" label="End Status"></el-table-column>
+                <el-table-column prop="endTime" label="End Time"></el-table-column>
                 <!-- <el-table-column prop="agencies" label="机构"></el-table-column> -->
-                <el-table-column fixed="right" label="操作" width="100">
+                <el-table-column fixed="right" label="Tool" width="100">
                   <template slot-scope="scope">
-                    <el-button @click="editEvent(scope.row)" type="text" size="small">编辑</el-button>
-                    <el-button @click="deleteEvent(scope.row)" type="text" size="small">删除</el-button>
+                    <el-button @click="editEvent(scope.row)" type="text" size="small">Edit</el-button>
+                    <el-button @click="deleteEvent(scope.row)" type="text" size="small">Delete</el-button>
                   </template>
                 </el-table-column>
               </el-table>
             </el-form-item>
-            <el-form-item label="状态ID" prop="id" required>
+            <el-form-item label="Status ID" prop="id" required>
               <el-input v-model="statusForm.id" disabled></el-input>
             </el-form-item>
-            <el-form-item label="状态名称" prop="name" v-if="statusNameFlag">
+            <el-form-item label="Status Name" prop="name" v-if="statusNameFlag">
               <el-input v-model="statusForm.name"></el-input>
             </el-form-item>
-            <el-form-item label="状态描述" prop="desc" v-if="statusDescFlag">
+            <el-form-item label="Status Desc" prop="desc" v-if="statusDescFlag">
               <el-input v-model="statusForm.desc"></el-input>
             </el-form-item>
             <template v-if="statusAgenciesFlag">
-              <el-button type="warning" @click="addAgency()">增加机构</el-button>
-              <label>如果所需机构不存在，可跳转<a href="/system/createAgency" target="_blank" style="text-decoration:none">创建</a>，如需更新机构选项，请点击<b @click="refreshAgenciesInfo()">刷新</b></label>
-              <el-form-item v-for="(item, index) in statusForm.agencies" :label="'所在机构'+index" :key="index">
+              <el-button type="warning" @click="addAgency()">Add Agency</el-button>
+              <label>If the required mechanism does not exist, it can be jumped<a href="/system/createAgency" target="_blank" style="text-decoration:none"></a>,To update the organization options, Click<b @click="refreshAgenciesInfo()"> Refresh</b></label>
+              <el-form-item v-for="(item, index) in statusForm.agencies" :label="'Agency'+index" :key="index">
                 <template>
                   <div style="clear:both"></div>
                   <div style="display:flex;justify-content: space-between;">
-                    <el-form-item class="sub-form-item" label="机构" label-width="60px" :prop="'agencies.' + index + '.agencyId'" :rules="{
-      required: true, message: '机构不能为空', trigger: 'blur'
+                    <el-form-item class="sub-form-item" label="Agency" label-width="60px" :prop="'agencies.' + index + '.agencyId'" :rules="{
+      required: true, message: 'Agency cannot be empty', trigger: 'blur'
     }">
-                      <el-select v-model="item.agencyId" filterable placeholder="请选择机构，可搜索">
+                      <el-select v-model="item.agencyId" filterable placeholder="Please select the agency,Searchable">
                         <el-option v-for="item in agenciesInfo" :key="item.id" :label="item.name" :value="item.id">
                         </el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item class="sub-form-item" label="职称" label-width="60px" :prop="'agencies.' + index + '.title'" :rules="{
-      required: true, message: '职称不能为空', trigger: 'blur'
+                    <el-form-item class="sub-form-item" label="Title" label-width="60px" :prop="'agencies.' + index + '.title'" :rules="{
+      required: true, message: 'Title cannot be empty', trigger: 'blur'
     }">
-                      <el-input v-model="item.title" placeholder="请输入职称"></el-input>
+                      <el-input v-model="item.title" placeholder="Please enter title"></el-input>
                     </el-form-item>
-                    <el-form-item class="sub-form-item" label="开始时间" label-width="90px" :prop="'agencies.' + index + '.startTime'" :rules="[{
-      required: true, message: '开始时间不能为空', trigger: 'blur'
+                    <el-form-item class="sub-form-item" label="Start Time" label-width="90px" :prop="'agencies.' + index + '.startTime'" :rules="[{
+      required: true, message: 'Start Time cannot be empty', trigger: 'blur'
     },
-    { min: 4, message: '长度不能低于4个字符', trigger: 'blur' }]">
-                      <el-input v-model="item.startTime" placeholder="例：2000年"></el-input>
+    { min: 4, message: 'No less than 4 characters in length', trigger: 'blur' }]">
+                      <el-input v-model="item.startTime" placeholder="Example: 2000"></el-input>
                     </el-form-item>
-                    <el-form-item class="sub-form-item" label="结束时间" label-width="90px" :prop="'agencies.' + index + '.endTime'" :rules="{
-      required: true, message: '结束时间不能为空', trigger: 'blur'
+                    <el-form-item class="sub-form-item" label="End Time" label-width="90px" :prop="'agencies.' + index + '.endTime'" :rules="{
+      required: true, message: 'End Time cannot be empty', trigger: 'blur'
     }">
-                      <el-input v-model="item.endTime" placeholder="若没有，填写至今"></el-input>
+                      <el-input v-model="item.endTime" placeholder="If not, fill in now"></el-input>
                     </el-form-item>
                     <el-button @click.prevent="removeAgency(item)"><i class="el-icon-delete"></i></el-button>
                   </div>
@@ -132,42 +132,42 @@
 
           </el-form>
           <hr />
-          <el-button type="primary" @click="addStatus('statusForm');">插入状态</el-button>
+          <el-button type="primary" @click="addStatus('statusForm');">Insert Status</el-button>
         </div>
 
       </div>
 
-      <el-dialog title="事件管理" width="40%" :visible.sync="eventDialogVisible" :close-on-click-modal=false>
+      <el-dialog title="Event Control" width="40%" :visible.sync="eventDialogVisible" :close-on-click-modal=false>
         <el-form ref="eventFrom" class="eventFrom" :model="eventFrom" :rules="eventRules" label-width="100px" size="mini">
-          <el-form-item label="事件名称" prop="name">
-            <el-input v-model="eventFrom.name" placeholder="请输入事件名称"></el-input>
+          <el-form-item label="Name" prop="name">
+            <el-input v-model="eventFrom.name" placeholder="Please enter event name"></el-input>
           </el-form-item>
-          <el-form-item label="事件类型" prop="type">
-            <el-select v-model="eventFrom.type" filterable placeholder="请选择事件类型，可搜索">
+          <el-form-item label="Type" prop="type">
+            <el-select v-model="eventFrom.type" filterable placeholder="Please select event type, Searchable">
               <el-option v-for="item in eventType" :key="item.key" :label="item.key" :value="item.value">
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="事件描述" prop="detail">
-            <el-input type="textarea" v-model="eventFrom.detail" placeholder="请输入事件详细描述"></el-input>
+          <el-form-item label="Desc" prop="detail">
+            <el-input type="textarea" v-model="eventFrom.detail" placeholder="Please enter event detail description"></el-input>
           </el-form-item>
-          <el-form-item label="起始状态" prop="fromStatus">
-            <el-select v-model="eventFrom.fromStatus" filterable placeholder="请选择起始状态，可搜索">
+          <el-form-item label="Start Status" prop="fromStatus">
+            <el-select v-model="eventFrom.fromStatus" filterable placeholder="Select start status, Searchable">
               <el-option label="Null" value="null"></el-option>
               <el-option v-for="item in getAvailableFromStatus(statusForm.id)" :key="item.id" :label="item.id" :value="item.id" v-if="item.id!=eventFrom.toStatus">
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="起始时间" prop="startTime">
-            <el-input v-model="eventFrom.startTime" placeholder="例：2000年"></el-input>
+          <el-form-item label="End Status" prop="startTime">
+            <el-input v-model="eventFrom.startTime" placeholder="Example: 2000"></el-input>
           </el-form-item>
-          <el-form-item label="结束时间" prop="endTime">
-            <el-input v-model="eventFrom.endTime" placeholder="若没有，填写至今"></el-input>
+          <el-form-item label="End Time" prop="endTime">
+            <el-input v-model="eventFrom.endTime" placeholder="If not, fill in now"></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="eventDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="addEvent('eventFrom')">确 定</el-button>
+          <el-button @click="eventDialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="addEvent('eventFrom')">Ok</el-button>
         </div>
       </el-dialog>
 
@@ -184,6 +184,7 @@ export default {
 
   data() {
     return {
+      item:"Create Character",
       imageUrl: "",
       characterForm: {
         id:"",
@@ -222,7 +223,7 @@ export default {
           {
             required: true,
 
-            message: "名称不能为空",
+            message: "Name不能为空",
 
             trigger: "blur"
           }
@@ -231,7 +232,7 @@ export default {
           {
             required: true,
 
-            message: "描述不能为空",
+            message: "Desc不能为空",
 
             trigger: "blur"
           }
@@ -269,7 +270,7 @@ export default {
           {
             required: true,
 
-            message: "名称不能为空",
+            message: "Name不能为空",
 
             trigger: "blur"
           }
@@ -278,7 +279,7 @@ export default {
           {
             required: true,
 
-            message: "描述不能为空",
+            message: "Desc不能为空",
 
             trigger: "blur"
           }
@@ -307,7 +308,7 @@ export default {
           {
             required: true,
 
-            message: "事件名称不能为空",
+            message: "事件Name不能为空",
 
             trigger: "blur"
           }
@@ -316,7 +317,7 @@ export default {
           {
             required: true,
 
-            message: "事件类型不能为空",
+            message: "事件Type不能为空",
 
             trigger: "blur"
           }
@@ -352,7 +353,7 @@ export default {
           {
             required: true,
 
-            message: "开始时间不能为空",
+            message: "Start Time不能为空",
 
             trigger: "blur"
           },
@@ -362,7 +363,7 @@ export default {
           {
             required: true,
 
-            message: "结束时间不能为空",
+            message: "End Time不能为空",
 
             trigger: "blur"
           }
@@ -371,23 +372,23 @@ export default {
       eventDialogVisible: false,
       eventType: [
         {
-          key: "开始工作",
+          key: "Start-up",
           value: "Create"
         },
         {
-          key: "名称改变",
+          key: "Name Change",
           value: "NameChange"
         },
         {
-          key: "机构改变",
+          key: "Agency Change",
           value: "AgencyChange"
         },
         {
-          key: "职称改变",
+          key: "Title Change",
           value: "TitleChange"
         },
         {
-          key: "研究方向改变",
+          key: "Research Domain Change",
           value: "ResearchChange"
         }
       ],
@@ -414,9 +415,9 @@ export default {
     const id = this.$route.params.id;
     var that = this;
     if (id) {
-      console.log(id);
+      this.item = "Edit Character";
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/GetResearcherByIdServlet", {
+        .get("http://172.21.213.33:8080//Knowledge/GetResearcherByIdServlet", {
           params: {
             id: id
           }
@@ -463,7 +464,7 @@ export default {
 
     generateUID(item) {
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/GenerateUIDServlet")
+        .get("http://172.21.213.33:8080//Knowledge/GenerateUIDServlet")
         .then(function(response) {
           item.id = response.data;
         });
@@ -476,7 +477,7 @@ export default {
     getAllAgenciesInfo() {
       var that = this;
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/GetAllAgencyServlet")
+        .get("http://172.21.213.33:8080//Knowledge/GetAllAgencyServlet")
         .then(function(response) {
           that.agenciesInfo = response.data.agency;
         });
@@ -545,7 +546,7 @@ export default {
         //提示
         this.$message({
           showClose: true,
-          message: "请填写人物名称和人物描述",
+          message: "请填写Name和Desc",
           type: "error"
         });
       }
@@ -637,7 +638,7 @@ export default {
         var that = this;
         this.axios({
           method: "post",
-          url: "http://172.21.212.183:8080/Knowledge/AddResearcherServlet",
+          url: "http://172.21.213.33:8080//Knowledge/AddResearcherServlet",
           data: this.qs.stringify(param),
           headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"

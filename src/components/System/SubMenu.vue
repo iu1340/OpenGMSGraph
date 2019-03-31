@@ -1,7 +1,7 @@
 <!--  -->
 <template>
 <el-menu :default-active="active" class="knowledge-sub-menu" background-color="#f9fafc">
-    <p class="header">菜单栏</p>
+    <p class="header">Menu</p>
      <el-menu-item v-for="item in subMenuList" :index="item.index" :key="item.path" v-if="!item.child"
     @click="$router.push(item.path)">
        <i :class="item.icon"></i> {{item.name}}
@@ -18,30 +18,30 @@ export default {
       subMenuList: [
         {
           index: "1",
-          name: "人物",
+          name: "Character",
           path: "/system",
           icon: "fa fa-user fa-fw"
         },{
           index: "2",
-          name: "机构",
+          name: "Agency",
           path: "/system/agency",
-          icon: "fa fa-user fa-fw"
+          icon: "fa fa-institution fa-fw"
         },
         {
           index: "3",
-          name: "模型",
+          name: "Model",
           path: "/system/model",
           icon: "fa fa-cube fa-fw"
         },
         {
           index: "4",
-          name: "地点",
+          name: "Location",
           path: "/system/location",
           icon: "fa fa-map-marker fa-fw"
         },
         {
           index: "5",
-          name: "场景",
+          name: "Scene",
           path: "/system/scene",
           icon: "fa fa-picture-o fa-fw"
         },

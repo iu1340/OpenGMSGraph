@@ -66,23 +66,24 @@ export default {
   methods: {
     getNodesAndLinks: function() {
       var that = this;
-      switch (this.type) {
-        case "model":
-          this.getModelType();
-          break;
-        case "agency":
-          this.getAgencyType();
-          break;
-        case "researcher":
-          this.getResearcherType();
-          break;
-      }
+      // switch (this.type) {
+      //   case "model":
+      //     this.getModelType();
+      //     break;
+      //   case "agency":
+      //     this.getAgencyType();
+      //     break;
+      //   case "researcher":
+      //     this.getResearcherType();
+      //     break;
+      // }
+      this.getKeywords();
     },
-    getModelType() {
+    getKeywords() {
       let that = this;
       this.axios
         .get(
-          "http://172.21.212.183:8080/Knowledge/GetModelKeywordsRelationByIdServlet",
+          "http://172.21.213.242:8080//Knowledge/GetKeywordsTop10ByIdServlet",
           {
             params: {
               id: this.id
@@ -91,43 +92,7 @@ export default {
         )
         .then(function(response) {
           if (response.status === 200) {
-            that.nodes = response.data.nodes;
-            that.displayRelationGraph();
-          }
-        });
-    },
-    getAgencyType() {
-      let that = this;
-      this.axios
-        .get(
-          "http://172.21.212.183:8080/Knowledge/GetAgencyKeywordsRelationByIdServlet",
-          {
-            params: {
-              id: this.id
-            }
-          }
-        )
-        .then(function(response) {
-          if (response.status === 200) {
-            that.nodes = response.data.nodes;
-            that.displayRelationGraph();
-          }
-        });
-    },
-    getResearcherType() {
-      let that = this;
-      this.axios
-        .get(
-          "http://172.21.212.183:8080/Knowledge/GetResearcherKeywordsRelationByIdServlet",
-          {
-            params: {
-              id: this.id
-            }
-          }
-        )
-        .then(function(response) {
-          if (response.status === 200) {
-            that.nodes = response.data.nodes;
+            that.nodes = response.data;
             that.displayRelationGraph();
           }
         });

@@ -13,7 +13,8 @@
 
     <div
       class="toolPanel"
-      v-show="loadFlag==false">
+      v-show="loadFlag==false"
+    >
       <div>
         <el-input
           placeholder="Please enter query"
@@ -63,22 +64,47 @@
         </el-input>
       </div>
       <div>
-        <el-date-picker
-          v-model="currentYear"
+        <!-- <el-date-picker
+          v-model="startYear"
           type="year"
-          placeholder="Select Year"
-          style="width:100%"
+          placeholder="Select Start Year"
+          style="width:48%;float:left"
           :picker-options="pickerOptions"
-          @change="changeYear"
           value-format="yyyy"
         >
         </el-date-picker>
+        <div style="float:left;height:20px;width:2%;border-bottom:1px soild #000;margin:0 1%"></div>
+        <el-date-picker
+          v-model="endYear"
+          type="year"
+          placeholder="Select End Year"
+          style="width:48%;float:left"
+          :picker-options="pickerOptions2"
+          @change="changeYear"
+          value-format="yyyy"
+        >
+        </el-date-picker> -->
+        <date-picker
+          v-model="selectYearRange"
+          lang="en"
+          type="year"
+          format="YYYY"
+          range
+          @confirm="changeYear"
+          style="width:100%"
+          :shortcuts="false"
+          :not-before="yearRange.min"
+          :not-after="yearRange.max"
+          :confirm="true"
+          :clearable="false"
+        ></date-picker>
       </div>
     </div>
 
     <div
       class="legendPanel"
-      v-show="loadFlag==false">
+      v-show="loadFlag==false"
+    >
       <h4>Legend</h4>
       <el-checkbox-group
         v-model="checkedLegend"
@@ -103,7 +129,8 @@
     <div id="d3Canvas"></div>
     <div
       id="rightPanel"
-      class="scrollbar">
+      class="scrollbar"
+    >
       <div class="closePanel">
       </div>
       <div class="info">
@@ -245,7 +272,7 @@
     </el-dialog>
 
     <el-dialog
-      title="Scene Panel"
+      :title="scenePanelTitle"
       :visible.sync="scenePanelVisible"
       :fullscreen="true"
       custom-class="scrollbar scenePanel"
@@ -352,6 +379,7 @@ import worldData from "@/assets/world.json";
 import { Loading } from "element-ui";
 import "@/assets/timeline.css";
 import { _debounce, _throttle } from "@/assets/debounceAndthrottle";
+import DatePicker from "vue2-datepicker";
 export default {
   name: "Graph",
   data() {
@@ -361,18 +389,20 @@ export default {
       loadingModelGraphHeight: 300,
       searchType: "Model",
       searchText: "",
-      currentYear: "2018",
+      startYear: new Date().getFullYear().toString(),
+      endYear: new Date().getFullYear().toString(),
+      selectYearRange: [new Date(), new Date()],
       yearRange: { min: 1900, max: 1900 },
       legend: [
-        { class: "fa fa-circle fa-fw", color: "#98df8a", key: "model" },
+        { class: "fa fa-circle fa-fw", color: "#069f5c", key: "model" },
         { class: "fa fa-circle fa-fw", color: "#d62728", key: "agency" },
-        { class: "fa fa-circle fa-fw", color: "#ff9896", key: "location" },
-        { class: "fa fa-circle fa-fw", color: "#9467bd", key: "researcher" },
+        { class: "fa fa-circle fa-fw", color: "#ff7700", key: "location" },
+        { class: "fa fa-circle fa-fw", color: "#425bff", key: "researcher" },
         { class: "fa fa-minus fa-fw", color: "#1f77b4", key: "locate" },
         { class: "fa fa-minus fa-fw", color: "#aec7e8", key: "create" },
         // { class: "fa fa-minus fa-fw", color: "#ffbb78", key: "used" },
-        { class: "fa fa-minus fa-fw", color: "#2ca02c", key: "belong" },
-        { class: "fa fa-minus fa-fw", color: "#ff7f0e", key: "use" }
+        { class: "fa fa-minus fa-fw", color: "#e59194", key: "belong" },
+        { class: "fa fa-minus fa-fw", color: "#fcda81", key: "use" }
       ],
       checkedLegend: [
         "model",
@@ -398,6 +428,14 @@ export default {
           );
         }
       },
+      pickerOptions2: {
+        disabledDate(time) {
+          return (
+            time.getFullYear() < that.startYear * 1 ||
+            time.getFullYear > that.yearRange.max * 1
+          );
+        }
+      },
       infoPanel: {
         id: "",
         class: "fa fa-globe fa-3x",
@@ -417,6 +455,7 @@ export default {
         countryGraph: null,
         countryOder: []
       },
+      scenePanelTitle:"",
       scenePanelVisible: false,
       scenePanelInfo: {
         currentId: "",
@@ -428,7 +467,8 @@ export default {
   },
 
   components: {
-    "knwoledge-top": toTop
+    "knwoledge-top": toTop,
+    "date-picker": DatePicker
   },
 
   computed: {},
@@ -441,6 +481,7 @@ export default {
   },
 
   mounted: function() {
+    console.log(this.selectYearRange);
     // Loading.service({ fullscreen: true,target:document.querySelector(".load-box")});
     const that = this;
     let getYearRangeAxios = this.getYearRange();
@@ -448,7 +489,7 @@ export default {
       if (response.status === 200) {
         that.yearRange = response.data;
         that.createLoadingGraph();
-        that.getKnowledgeGraphInfo4Year(that.currentYear);
+        that.getKnowledgeGraphInfo4Year(that.startYear, that.endYear);
       } else {
         alert("year range get error");
       }
@@ -470,7 +511,7 @@ export default {
   methods: {
     getYearRange() {
       var getYearRangeAxios = this.axios.get(
-        "http://172.21.212.183:8080/Knowledge/GetGraphTimeRangeServlet"
+        "http://172.21.213.242:8080/Knowledge/GetGraphYearRangeServlet"
       );
       return getYearRangeAxios;
     },
@@ -530,36 +571,48 @@ export default {
     },
     getLoadingGraphOfYear: async function(min, max) {
       let option = this.loadingGraph.getOption();
-      let legend = [];
+      let legend = new Set();
       let series = option.series;
       this.loadingGraph.setOption(option);
       let that = this;
+      let dataArray = [];
       for (let i = min; i <= max; i++) {
         let data = await this.getModelUse4Year(i);
-        for (let i = 0; i < data.length; i++) {
-          let obj = data[i];
-          legend.push(obj.name);
-          let flag = false;
-          for (let j = 0; j < series.length; j++) {
-            let seriesObj = series[j];
+        dataArray.push(data);
+        for (let j = 0; j < data.length; j++) {
+          let obj = data[j];
+          legend.add(obj.name);
+        }
+      }
+
+      let legendArray = Array.from(legend);
+      for (let i = 0; i < legendArray.length; i++) {
+        let name = legendArray[i];
+        let array = new Array(max - min);
+        array.fill(0);
+        let seriesObj = {
+          name: name,
+          type: "bar",
+          stack: "Models",
+          data: array
+        };
+        series.push(seriesObj);
+      }
+
+      for (let i = 0; i < dataArray.length; i++) {
+        let data = dataArray[i];
+        for (let j = 0; j < data.length; j++) {
+          let obj = data[j];
+          for (let k = 0; k < series.length; k++) {
+            let seriesObj = series[k];
             if (seriesObj.name === obj.name) {
-              seriesObj.data.push(obj.count);
-              flag = true;
+              seriesObj.data[i] = obj.count;
               break;
             }
           }
-          if (!flag) {
-            let seriesObj = {
-              name: obj.name,
-              type: "bar",
-              stack: "Models",
-              data: [obj.count]
-            };
-            series.push(seriesObj);
-          }
         }
       }
-      option.legend[0].data = legend;
+      option.legend[0].data = legendArray;
       that.loadingGraph.setOption(option);
     },
     getModelUse4Year(year) {
@@ -567,7 +620,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/GetModelGraphByYearServlet",
+            "http://172.21.213.242:8080//Knowledge/GetModelGraphByYearServlet",
             {
               params: {
                 year: year
@@ -581,21 +634,63 @@ export default {
       return promise;
     },
     changeYear(val) {
-      this.getKnowledgeGraphInfo4Year(val);
-    },
-    handleSearch: _debounce(function() {
+      this.startYear = this.selectYearRange[0].getFullYear();
+      this.endYear = this.selectYearRange[1].getFullYear();
       if (this.searchText === "") {
-        this.getKnowledgeGraphInfo4Year(this.currentYear);
+        this.getKnowledgeGraphInfo4Year(this.startYear, this.endYear);
       } else {
         this.loadFlag = true;
         let that = this;
         this.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/GetModelGraphBySearchTextServlet",
+            "http://172.21.213.242:8080//Knowledge/GetModelGraphBySearchTextServlet",
             {
               params: {
                 type: this.searchType,
-                text: this.searchText
+                text: this.searchText,
+                sTime: this.startYear,
+                eTime: this.endYear
+              }
+            }
+          )
+          .then(function(response) {
+            that.checkedLegend = [
+              "model",
+              "agency",
+              "location",
+              "researcher",
+              "locate",
+              "create",
+              "used",
+              "belong",
+              "use"
+            ];
+            that.knowledgeGraphInfo = response.data;
+            let nodes = that.knowledgeGraphInfo.nodes;
+            let links = that.knowledgeGraphInfo.links;
+            that.createKnowlegedGraph4YearD3(nodes, links);
+          });
+      }
+    },
+    // changeYear:_debounce(function(){
+    //   console.log(this.endYear)
+    //   // this.getKnowledgeGraphInfo4Year(this.startYear,this.endYear);
+    // },1000),
+    handleSearch: _debounce(function() {
+      if (this.searchText === "") {
+        this.getKnowledgeGraphInfo4Year(this.startYear, this.endYear);
+      } else {
+        this.loadFlag = true;
+        let that = this;
+        this.axios
+          .get(
+            "http://172.21.213.242:8080//Knowledge/GetModelGraphBySearchTextServlet",
+            {
+              params: {
+                type: this.searchType,
+                text: this.searchText,
+                sTime: this.startYear,
+                eTime: this.endYear
               }
             }
           )
@@ -618,13 +713,14 @@ export default {
           });
       }
     }, 500),
-    getKnowledgeGraphInfo4Year(year) {
+    getKnowledgeGraphInfo4Year(startYear, endYear) {
       let that = this;
       this.loadFlag = true;
       this.axios
-        .get("http://172.21.212.183:8080/Knowledge/GetGraphByYearServlet", {
+        .get("http://172.21.213.242:8080//Knowledge/GetGraphByYearServlet", {
           params: {
-            year: year
+            sTime: startYear,
+            eTime: endYear
           }
         })
         .then(function(response) {
@@ -646,6 +742,27 @@ export default {
         });
     },
     createKnowlegedGraph4YearD3(nodes, links) {
+      let max = 1,
+        min = 1;
+      for (let node of nodes) {
+        if (node.value > max) {
+          max = node.value;
+        }
+        if (node.value < min) {
+          min = node.value;
+        }
+      }
+
+      for (let i = 0; i < nodes.length; i++) {
+        let node = nodes[i];
+        let value = node.value;
+        let norm = ((value - min) * 4) / (max - min);
+        if (norm < 1) {
+          norm = 1;
+        }
+        node.radius = 4 * norm;
+      }
+
       this.loadFlag = false;
       $("#d3Canvas").empty();
       $(".tooltip").remove();
@@ -706,21 +823,22 @@ export default {
       // if (strength < 0) {
       //   strength = -strength;
       // }
-
+      console.log(nodes.length/2);
       let simulation = d3
         .forceSimulation()
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("x", d3.forceX(width / 2).strength(0.1))
         .force("y", d3.forceY(height / 2).strength(0.1))
-        .force("charge", d3.forceManyBody().strength(-50))
+        .force("charge", d3.forceManyBody().strength(-nodes.length))
         .force(
           "link",
           d3
             .forceLink()
-            .strength(1)
+            .strength(2)
             .id(function(d) {
               return d.id;
             })
+            // .distance(60)
         )
         .alphaTarget(0)
         .alphaDecay(0.05);
@@ -941,7 +1059,7 @@ export default {
           ) {
             context.strokeStyle = "rgba(0,0,0,0.1)"; //ColorToRgba(color(d.type), 0.1)
           } else {
-            context.strokeStyle = color(d.type);
+            context.strokeStyle = color(d.label);
           }
 
           context.stroke();
@@ -960,10 +1078,18 @@ export default {
         // });
         for (let i = 0; i < nodes.length; i++) {
           let d = nodes[i];
+          // console.log(d)
+          // let myvalue = d.value;
           context.beginPath();
+          // console.log(myvalue);
           // context.arc(d.x, d.y, radius, 0, 3 * Math.PI, true);
-          // context.moveTo(d.x , d.y);
-          context.arc(d.x, d.y, radius, 0, 2 * Math.PI, true);
+          // // context.moveTo(d.x , d.y);
+          // let norm = (myvalue-min)*4/(max-min);
+          // if(norm<1){
+          //   norm = 1;
+          // }
+
+          context.arc(d.x, d.y, d.radius, 0, 2 * Math.PI, true);
           if (
             connected.connectedNodes.length > 0 &&
             connected.connectedNodes.indexOf(d.id) < 0
@@ -1137,7 +1263,7 @@ export default {
           let orderListPromise = new Promise(function(resolve, reject) {
             that.axios
               .get(
-                "http://172.21.212.183:8080/Knowledge/GetOrderListByModelIdServlet",
+                "http://172.21.213.242:8080//Knowledge/GetOrderListByModelIdServlet",
                 {
                   params: {
                     id: info.id
@@ -1254,7 +1380,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/GetUseCountByYearAndIdServlet",
+            "http://172.21.213.242:8080//Knowledge/GetUseCountByYearAndIdServlet",
             {
               params: { year: year, id: id, category: category }
             }
@@ -1389,7 +1515,7 @@ export default {
       let promise = new Promise(function(resolve, reject) {
         that.axios
           .get(
-            "http://172.21.212.183:8080/Knowledge/GetUseCountryCountByYearAndIdServlet",
+            "http://172.21.213.242:8080//Knowledge/GetUseCountryCountByYearAndIdServlet",
             {
               params: { year: year, id: id, category: category }
             }
@@ -1403,6 +1529,7 @@ export default {
       return promise;
     },
     scenePanelShow(info) {
+      this.scenePanelTitle = "Scenes of "+info.title
       this.scenePanelVisible = true;
       if (this.scenePanelInfo.currentId !== info.id) {
         this.scenePanelInfo.page = 1;
@@ -1419,7 +1546,7 @@ export default {
       });
       this.axios
         .get(
-          "http://172.21.212.183:8080/Knowledge/GetSceneByTypeAndIdServlet",
+          "http://172.21.213.33:8080//Knowledge/GetSceneByTypeAndIdServlet",
           {
             params: {
               type: info.subType,
@@ -1433,7 +1560,9 @@ export default {
             loadingInstance.close();
             that.scenePanelInfo.currentId = info.id;
             that.scenePanelInfo.count = response.data.count;
-            that.scenePanelInfo.scenePanelData = that.scenePanelInfo.scenePanelData.concat(response.data.scene);
+            that.scenePanelInfo.scenePanelData = that.scenePanelInfo.scenePanelData.concat(
+              response.data.scene
+            );
             if (that.scenePanelInfo.scenePanelData.length === 0) {
               that.$message({
                 showClose: true,

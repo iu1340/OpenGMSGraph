@@ -7,12 +7,12 @@
           type="primary"
           :plain="graphActive!='cooperation'"
           @click="handleBtn('cooperation')"
-        >合作机构</el-button>
+        >Cooperative Organization</el-button>
         <el-button
           type="primary"
           :plain="graphActive!='subjection'"
           @click="handleBtn('subjection')"
-        >研究成员</el-button>
+        >Research Members</el-button>
       </div>
     </template>
 
@@ -22,7 +22,7 @@
           type="primary"
           :plain="graphActive!='cooperation'"
           @click="handleBtn('cooperation')"
-        >合作研究者</el-button>
+        >Cooperative Researcher</el-button>
       </div>
     </template>
 
@@ -41,7 +41,7 @@ export default {
       graphActive: "cooperation",
       graphData: {},
       kclass: [],
-      color: ["#546570", "#91c7ae", "#61a0a8", "#2f4554", "#c23531"]
+      color: [ "#6DCE9E", "#60B58B","#FF7F24","#D90404", "#8C0303", ]
     };
   },
 
@@ -87,21 +87,27 @@ export default {
       }
     },
     createGraph() {
+      let that = this;
       let graph = this.graphData;
 
       if (!graph.nodes) {
         return false;
       }
-
+      
       let countArray = graph.links.map(function(item) {
-        return item.value;
+        if(item.source===that.id||item.target===that.id){
+          return item.value;
+        }else{
+          return 1;
+        }        
       });
-      let classNum = 5;
-      if (countArray.length < 5) {
+      let classNum = 4;
+      if (countArray.length < 4) {
         classNum = countArray.length;
       }
 
       this.kclass = this.getJenksBreaks(countArray, classNum);
+      // console.log(countArray,this.kclass);
 
       $("#d3Relation").empty();
       $(".tooltip").remove();
@@ -112,7 +118,6 @@ export default {
         .attr("class", "tooltip")
         .style("opacity", 0);
 
-      let that = this;
       let height = $("#d3Relation").height();
       let width = $("#d3Relation").width();
       let svg = d3
@@ -155,18 +160,24 @@ export default {
       //   )
       //   .force("collide", d3.ellipseForce(6, 0.5, 5))
       //   .force("center", d3.forceCenter(width / 2, height / 2));
+      let force = -3000;
+      if(graph.links.length*5>3000){
+        force = -(graph.links.length)
+      }
       let simulation = d3
         .forceSimulation()
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("charge", d3.forceManyBody().strength(-3000))
+        .force("charge", d3.forceManyBody().strength(force*3))
         .force(
           "link",
           d3
             .forceLink()
-            .strength(1)
+            .strength(0.5)
+            .distance(40)
             .id(function(d) {
               return d.id;
             })
+            
         );
 
       var link = g
@@ -201,10 +212,10 @@ export default {
         })
         .attr("fill", function(d) {
           if (d.id === that.id) {
-            return "#6e7074";
+            return "#8C0303";
           } else {
             let weight = that.getWeight(d.value);
-            console.log(weight);
+            // console.log(weight);
             let index = weight / 3;
             return that.color[index];
           }
@@ -345,11 +356,55 @@ export default {
         g.attr("transform", d3.event.transform);
       }
     },
+    draw_curve(Ax, Ay, Bx, By, M, context) {
+      var dx = Bx - Ax,
+        dy = By - Ay,
+        dr = Math.sqrt(dx * dx + dy * dy);
+
+      // side is either 1 or -1 depending on which side you want the curve to be on.
+      // Find midpoint J
+      var Jx = Ax + (Bx - Ax) / 2;
+      var Jy = Ay + (By - Ay) / 2;
+
+      // We need a and b to find theta, and we need to know the sign of each to make sure that the orientation is correct.
+      var a = Bx - Ax;
+      var asign = a < 0 ? -1 : 1;
+      var b = By - Ay;
+      var bsign = b < 0 ? -1 : 1;
+      var theta = Math.atan(b / a);
+
+      // Find the point that's perpendicular to J on side
+      var costheta = asign * Math.cos(theta);
+      var sintheta = asign * Math.sin(theta);
+
+      // Find c and d
+      var c = M * sintheta;
+      var d = M * costheta;
+
+      // Use c and d to find Kx and Ky
+      var Kx = Jx - c;
+      var Ky = Jy + d;
+      // context.bezierCurveTo(Kx, Ky,Bx,By, Ax, Ax);
+      context.quadraticCurveTo(Kx, Ky, Bx, By);
+
+      // draw the ending arrowhead
+      // var endRadians = Math.atan(dx / dy);
+      // context.stroke();
+
+      // drawArrowhead(context, Bx, By, endRadians);
+      // context.arc(Jx, Jy, dr, dr, 2 * Math.PI, true);
+
+      /*
+    return "M" + Ax + "," + Ay +
+           "Q" + Kx + "," + Ky +
+           " " + Bx + "," + By
+   */
+    },
     getAgencyCooperation() {
       let that = this;
       this.axios
         .get(
-          "http://172.21.212.183:8080/Knowledge/GetAgencyCooperationByIdServlet",
+          "http://172.21.213.242:8080//Knowledge/GetAgencyCooperationByIdServlet",
           {
             params: {
               id: this.id
@@ -367,7 +422,7 @@ export default {
       let that = this;
       this.axios
         .get(
-          "http://172.21.212.183:8080/Knowledge/GetAgencyResearchersByIdServlet",
+          "http://172.21.213.242:8080//Knowledge/GetAgencyResearchersByIdServlet",
           {
             params: {
               id: this.id
@@ -385,7 +440,7 @@ export default {
       let that = this;
       this.axios
         .get(
-          "http://172.21.212.183:8080/Knowledge/GetResearcherCooperationByIdServlet",
+          "http://172.21.213.242:8080//Knowledge/GetResearcherCooperationByIdServlet",
           {
             params: {
               id: this.id
@@ -406,7 +461,7 @@ export default {
       }
       // int numclass;
       var numdata = data.length;
-      if(numdata<=0){
+      if (numdata <= 0) {
         return [];
       }
       data.sort(sortNumber); //先排序

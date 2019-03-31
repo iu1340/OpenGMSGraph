@@ -8,6 +8,8 @@ import "font-awesome/css/font-awesome.min.css";
 import KnowledgeGraph from "@/components/Graph";
 import Status from "@/components/Status";
 import System from "@/components/System";
+import Login from "@/components/Login";
+import Register from "@/components/Register";
 import Characters from "@/components/System/Characters";
 import Models from "@/components/System/Models";
 import Locations from "@/components/System/Location";
@@ -33,22 +35,22 @@ export default new Router({
   routes: [
     {
       path: "/",
-      name: "图谱",
+      name: "Graph",
       component: KnowledgeGraph
     },
     {
       path: "/status/:category/:id",
-      name: "状态",
+      name: "Status",
       component: Status
     },
     {
       path: "/map/:modelId",
-      name: "地图",
+      name: "Map",
       component: Map
     },
     {
       path: "/system",
-      name: "管理系统",
+      name: "System",
       component: System,
       children: [
         { path: "/", name: "人物", component: Characters },
@@ -80,6 +82,16 @@ export default new Router({
         { path: "createScene", name: "创建场景", component: CreateScene },
         { path: "editScene/:id", name: "修改场景", component: CreateScene }
       ]
+    },
+    {
+      path: "/login",
+      name: "Login",
+      component: Login
+    },
+    {
+      path: "/register",
+      name: "Register",
+      component: Register
     }
   ]
 });

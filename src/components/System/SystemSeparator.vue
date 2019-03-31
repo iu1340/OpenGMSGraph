@@ -3,7 +3,7 @@
     <div>
         <el-breadcrumb separator-class="el-icon-arrow-right" class="knowledge-separator">
             <!-- <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item> -->
-            <el-breadcrumb-item>首页</el-breadcrumb-item>
+            <el-breadcrumb-item>HomePage</el-breadcrumb-item>
             <el-breadcrumb-item>{{item}}</el-breadcrumb-item>
         </el-breadcrumb>        
     </div>
