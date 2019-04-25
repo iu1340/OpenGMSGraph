@@ -21,6 +21,7 @@ import CreateAgency from "@/components/System/Create/CreateAgency";
 import CreateModel from "@/components/System/Create/CreateModel";
 import CreateLocation from "@/components/System/Create/CreateLocation";
 import CreateScene from "@/components/System/Create/CreateScene";
+import Minigrate from "@/components/StatusGraph/Minigrate";
 import echarts from 'echarts'
 
 Vue.use(Router);
@@ -92,6 +93,11 @@ export default new Router({
       path: "/register",
       name: "Register",
       component: Register
+    },
+    {
+      path:"/minigrate",
+      name:"Minigrate",
+      component:Minigrate
     }
   ]
 });

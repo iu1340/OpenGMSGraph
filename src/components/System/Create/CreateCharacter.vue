@@ -73,7 +73,7 @@
                 <el-table-column prop="type" label="Type" :formatter="formatEventTypeByType"></el-table-column>
                 <el-table-column prop="detail" label="Desc"></el-table-column>
                 <el-table-column prop="fromStatus" label="Start Status"></el-table-column>
-                <el-table-column prop="startTime" label="End Status"></el-table-column>
+                <el-table-column prop="startTime" label="Start Time"></el-table-column>
                 <el-table-column prop="endTime" label="End Time"></el-table-column>
                 <!-- <el-table-column prop="agencies" label="机构"></el-table-column> -->
                 <el-table-column fixed="right" label="Tool" width="100">
@@ -158,7 +158,7 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="End Status" prop="startTime">
+          <el-form-item label="Start Time" prop="startTime">
             <el-input v-model="eventFrom.startTime" placeholder="Example: 2000"></el-input>
           </el-form-item>
           <el-form-item label="End Time" prop="endTime">

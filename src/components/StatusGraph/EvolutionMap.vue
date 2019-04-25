@@ -1,28 +1,18 @@
 <!-- Map -->
 <template>
   <div class="main">
-    <div class="button-group">
-      <el-button
-        type="primary"
-        :plain="mapActive!=='d3'"
-        @click="mapActiveHandle('d3')"
-      >3D Map</el-button>
-      <el-button
-        type="primary"
-        :plain="mapActive!=='leaflet'"
-        @click="mapActiveHandle('leaflet')"
-      >2D Map</el-button>
+    <div id="title">
+      <i
+        class="fa fa-angle-left"
+        @click="pre"
+      ></i>
+      <span>{{modelName}}</span>
+      <i
+        class="fa fa-angle-right"
+        @click="next"
+      ></i>
     </div>
-    <div
-      id="d3-content"
-      v-show="mapActive==='d3'"
-    >
-      <canvas id="content"></canvas>
-    </div>
-    <div
-      id="vue-leaflet"
-      v-show="mapActive==='leaflet'"
-    >
+    <div id="vue-leaflet">
     </div>
   </div>
 </template>
@@ -48,15 +38,16 @@ export default {
   props: ["type", "id"],
   data() {
     return {
-      mapActive: "d3",
+      statusInfo: [],
       locationOfModel: [],
       locationGeojson: [],
       kclass: [],
       map: null,
       zoom: 2,
       center: L.latLng(0, 0),
-      // color: [ "#6DCE9E", "#60B58B","#FF7F24","#FF4500" ]
-      color: [ "#60B58B", "#FF7F24","#FF4500","#FF4500" ]
+      color: ["#60B58B", "#FF7F24", "#FF4500", "#FF4500"],
+      idx: 0,
+      modelName: ""
     };
   },
 
@@ -67,11 +58,34 @@ export default {
   computed: {},
 
   mounted: function() {
-    this.getLocationInfo();
+    this.getStatusInfo();
   },
 
   methods: {
+    getStatusInfo() {
+      let that = this;
+      this.axios
+        .get("http://172.21.213.242:8080//Knowledge/GetModelByIdServlet", {
+          params: {
+            id: this.id
+          }
+        })
+        .then(function(response) {
+          // console.log(response);
+          if (response.status === 200) {
+            console.log(response.data);
+            that.statusInfo = response.data.status;
+            that.getLocationInfo();
+          } else {
+            that.$message.error("找不到条目");
+          }
+        });
+    },
     getLocationInfo() {
+      this.modelName =
+        this.statusInfo[this.idx]["name"] +
+        " " +
+        this.statusInfo[this.idx]["version"];
       let loadingInstance = Loading.service({
         target: document.querySelector(".main"),
         spinner: "el-icon-loading"
@@ -79,10 +93,12 @@ export default {
       let that = this;
       this.axios
         .get(
-          "http://172.21.213.242:8080//Knowledge/GetGeoJsonOfModelIdServlet",
+          "http://172.21.213.242:8080//Knowledge/GetGeoJsonOfModelIdAndYearServlet",
           {
             params: {
-              id: this.id
+              id: this.id,
+              startTime: this.statusInfo[this.idx].startTime,
+              endTime: this.statusInfo[this.idx].endTime
             }
           }
         )
@@ -107,23 +123,7 @@ export default {
               Promise.all(promises).then(result => {
                 loadingInstance.close();
                 that.locationGeojson = result;
-                if (that.mapActive === "d3") {
-                  that.$nextTick(function() {
-                    if (that.map) {
-                      that.map.remove();
-                      that.map = null;
-                    }
-                    that.createD3Map();
-                  });
-                } else {
-                  that.$nextTick(function() {
-                    if (that.map) {
-                      that.map.remove();
-                      that.map = null;
-                    }
-                    that.createLeafletMap();
-                  });
-                }
+                that.createLeafletMap();
               });
             } else {
               that.$message.error("没有结果");
@@ -134,6 +134,13 @@ export default {
         });
     },
     createLeafletMap() {
+      // this.map.off();
+      // this.map.remove();
+      document.getElementById("vue-leaflet").remove(true);
+      let mapDom = document.createElement("div");
+      mapDom.id = "vue-leaflet";
+      document.getElementsByClassName("main")[0].appendChild(mapDom)
+      this.map = null;
       let that = this;
       this.map = L.map("vue-leaflet").setView([0, 0], 2);
       // L.tileLayer(this.url).addTo(this.map);
@@ -165,8 +172,8 @@ export default {
             let location = this.locationOfModel[i];
             if (location.id === obj.id) {
               let weight = this.getWeight(location.count);
-              
-              currentColor = that.color[weight-3];
+
+              currentColor = that.color[weight - 3];
               weight = weight / 10;
               break;
             }
@@ -181,145 +188,11 @@ export default {
               geojsonMarkerOptions.fillColor = currentColor;
               return L.circleMarker(latlng, geojsonMarkerOptions);
             }
-          }).addTo(this.map).bindPopup(obj.name);
+          })
+            .addTo(this.map)
+            .bindPopup(obj.name);
         }
       }
-    },
-    createD3Map() {
-      var that = this;
-      var width = $("#d3-content").width();
-      var height = $("#d3-content").height();
-      var size = d3.min([width, height]);
-
-      var rotationDelay = 3000;
-      var angles = { x: -20, y: 40, z: 0 };
-      var v0; // Mouse position in Cartesian coordinates at start of drag gesture.
-      var r0; // Projection rotation as Euler angles at start.
-      var q0; // Projection rotation as versor at start.
-
-      var context = document.getElementById("content").getContext("2d");
-
-      d3.select("#content")
-        .attr("width", width + "px")
-        .attr("height", height + "px")
-        .call(
-          d3
-            .drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-          // .on("end", dragended)
-        );
-
-      var projection = d3
-        .geoOrthographic()
-        .scale(0.45 * size)
-        .translate([0.5 * width, 0.5 * height]);
-
-      var geoGenerator = d3
-        .geoPath()
-        .projection(projection)
-        .context(context)
-        .pointRadius(0.1);
-
-      function drawFeatures(features, fill) {
-        context.beginPath();
-        geoGenerator({ type: "FeatureCollection", features: features });
-        if (fill) {
-          context.fill();
-        }
-        context.stroke();
-      }
-
-      function drawLocationGeoJson(obj, fill) {
-        if (GJV.valid(obj.geojson)) {
-          context.beginPath();
-          let currentColor = that.color[0];
-          for (let i = 0; i < that.locationOfModel.length; i++) {
-            let location = that.locationOfModel[i];
-            if (location.id === obj.id) {
-              let weight = that.getWeight(location.count);
-              currentColor = that.color[weight-3];
-              context.lineWidth = weight / 10;
-              break;
-            }
-          }
-          context.strokeStyle = currentColor;
-          context.fillStyle = currentColor;
-          
-          // console.log(obj);
-          geoGenerator({
-            type: "FeatureCollection",
-            features: [{ type: "Feature", geometry: obj.geojson }]
-          });
-          
-          context.stroke();
-          // if (obj.geojson.type==="Polygon") {
-          //   context.fill();
-          // }
-        }
-      }
-
-      function update(r) {
-        context.clearRect(0, 0, width, height);
-
-        projection.rotate(r);
-
-        context.lineWidth = 0.3;
-        context.strokeStyle = "#999";
-        context.fillStyle = "#d0d0d0";
-        drawFeatures(landGeojson.features, true);
-
-        for (let obj of that.locationGeojson) {
-          drawLocationGeoJson(obj, false);
-          context.strokeStyle = "#999";
-          context.fillStyle = "#d0d0d0";
-        }
-      }
-
-      function dragstarted() {
-        timer.stop();
-        v0 = versor.cartesian(projection.invert(d3.mouse(this)));
-        r0 = projection.rotate();
-        q0 = versor(r0);
-        // stopRotation();
-      }
-
-      function dragged() {
-        var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
-        var q1 = versor.multiply(q0, versor.delta(v0, v1));
-        var r1 = versor.rotation(q1);
-        // projection.rotate(r1);
-        update(r1);
-      }
-
-      function dragended() {
-        time = new Date();
-        setTimeout(
-          timer.restart(function() {
-            var dt = Date.now() - time;
-            let r1 = -dt / 1000 - 40;
-            update([r1]);
-          }),
-          1500
-        );
-      }
-
-      function setAngles() {
-        var rotation = projection.rotate();
-        rotation[0] = angles.y;
-        rotation[1] = angles.x;
-        rotation[2] = angles.z;
-        update([-40]);
-      }
-
-      var time = Date.now();
-      var timer = d3.timer(function() {
-        var dt = Date.now() - time;
-        let r1 = -dt / 1000 - 40;
-        update([r1]);
-      });
-
-      setAngles();
     },
     getLocationGeojson(id) {
       let that = this;
@@ -463,6 +336,14 @@ export default {
           that.createLeafletMap();
         });
       }
+    },
+    pre() {
+      this.idx = this.idx - 1;
+      this.getLocationInfo();
+    },
+    next() {
+      this.idx = this.idx + 1;
+      this.getLocationInfo();
     }
   }
 };
@@ -473,18 +354,24 @@ export default {
   width: 100%;
   position: relative;
 }
-#d3-content,
-#vue-leaflet {
+#d3-content {
   height: 100%;
   width: 100%;
   position: relative;
-  background: #ffffff
+  background: #ffffff;
 }
 .button-group {
   position: absolute;
   top: 12px;
   left: 50px;
   z-index: 998;
+}
+#title {
+  position: absolute;
+  top: 0;
+  left: 45%;
+  font-size: 22px;
+  z-index: 9999;
 }
 </style>
 <style>
@@ -493,5 +380,11 @@ export default {
 }
 .leaflet-control-container {
   display: none;
+}
+#vue-leaflet {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  background: #ffffff;
 }
 </style>

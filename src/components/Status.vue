@@ -8,8 +8,7 @@
       <el-aside
         width="300px"
         style="background-color: rgb(238, 241, 246);"
-        class="scrollbar"
-      >
+        class="scrollbar">
         <div class="info">
           <div>
             <i
@@ -213,8 +212,7 @@
           <div
             id="status-flow-chart"
             v-if="showPanel==='status'"
-            style="width:100%;height:100%"
-          >
+            style="width:100%;height:100%">
             <div class="button-group">
               <el-button
                 type="primary"
@@ -231,7 +229,14 @@
                 :plain="btnActive!='horizontal'"
                 @click="graphDirectionHandle('horizontal')" style="width:140px"
               >Horizontal View</el-button>
+               <el-button
+                type="primary"
+                :plain="btnActive!='evolution'"
+                @click="graphDirectionHandle('evolution')" style="width:140px"
+              >Spatial Evolution</el-button>
             </div>
+            <status-evolution v-if="btnActive=='evolution'"  :id="id"
+            :type="type"></status-evolution>
           </div>
         </template>
         <template v-if="graphActive==='used'">
@@ -262,6 +267,7 @@ import Used from "@/components/StatusGraph/Used";
 import LMap from "@/components/StatusGraph/Map";
 import Keyword from "@/components/StatusGraph/Keyword";
 import Relation from "@/components/StatusGraph/Relation";
+import EvolutionMap from "@/components/StatusGraph/EvolutionMap";
 import * as d3 from "d3v4";
 import * as dagreD3 from "dagre-d3";
 import { _debounce, _throttle } from "@/assets/debounceAndthrottle";
@@ -301,7 +307,8 @@ export default {
     "status-used": Used,
     "status-map": LMap,
     "status-keyword": Keyword,
-    "status-relation": Relation
+    "status-relation": Relation,
+    "status-evolution":EvolutionMap
   },
 
   computed: {},
@@ -513,7 +520,10 @@ export default {
       this.handleCloseRightPanel();
       if (direction === "packing") {
         this.createStatusChart();
-      } else {
+      }else if(direction === "evolution") {
+        $("#status-flow-chart svg").remove();
+      }
+      else {
         this.createFlowchart();
       }
     },
@@ -1042,6 +1052,7 @@ export default {
   position: absolute;
   top: 0;
   left: 20px;
+  z-index: 9999;
 }
 
 #status-flow-chart .button-group button {

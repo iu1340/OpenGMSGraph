@@ -115,7 +115,8 @@
           v-for="item in legend"
           :label="item.key"
           :key="item.color"
-          style="margin-left:25px"
+          style="margin-left:25px;"
+          size="medium"
         >
           <i
             :class="item.class"
@@ -394,15 +395,15 @@ export default {
       selectYearRange: [new Date(), new Date()],
       yearRange: { min: 1900, max: 1900 },
       legend: [
-        { class: "fa fa-circle fa-fw", color: "#069f5c", key: "model" },
-        { class: "fa fa-circle fa-fw", color: "#d62728", key: "agency" },
-        { class: "fa fa-circle fa-fw", color: "#ff7700", key: "location" },
-        { class: "fa fa-circle fa-fw", color: "#425bff", key: "researcher" },
-        { class: "fa fa-minus fa-fw", color: "#1f77b4", key: "locate" },
-        { class: "fa fa-minus fa-fw", color: "#aec7e8", key: "create" },
+        { class: "fa fa-circle fa-fw", color: "#dd6b66", key: "model" },
+        { class: "fa fa-circle fa-fw", color: "#759aa0", key: "agency" },
+        { class: "fa fa-circle fa-fw", color: "#e69d87", key: "location" },
+        { class: "fa fa-circle fa-fw", color: "#8dc1a9", key: "researcher" },
+        { class: "fa fa-minus fa-fw", color: "#ea7e53", key: "locate" },
+        { class: "fa fa-minus fa-fw", color: "#eedd78", key: "create" },
         // { class: "fa fa-minus fa-fw", color: "#ffbb78", key: "used" },
-        { class: "fa fa-minus fa-fw", color: "#e59194", key: "belong" },
-        { class: "fa fa-minus fa-fw", color: "#fcda81", key: "use" }
+        { class: "fa fa-minus fa-fw", color: "#73a373", key: "belong" },
+        { class: "fa fa-minus fa-fw", color: "#73b9bc", key: "use" }
       ],
       checkedLegend: [
         "model",
@@ -455,14 +456,27 @@ export default {
         countryGraph: null,
         countryOder: []
       },
-      scenePanelTitle:"",
+      scenePanelTitle: "",
       scenePanelVisible: false,
       scenePanelInfo: {
         currentId: "",
         scenePanelData: [],
         count: 0,
         page: 1
-      }
+      },
+      color: [
+        "#dd6b66",
+        "#759aa0",
+        "#e69d87",
+        "#8dc1a9",
+        "#ea7e53",
+        "#eedd78",
+        "#73a373",
+        "#73b9bc",
+        "#7289ab",
+        "#91ca8c",
+        "#f49f42"
+      ]
     };
   },
 
@@ -542,6 +556,9 @@ export default {
           }
         },
         legend: {
+          textStyle:{
+            color:"#fff"
+          },
           data: []
         },
         grid: {
@@ -823,7 +840,7 @@ export default {
       // if (strength < 0) {
       //   strength = -strength;
       // }
-      console.log(nodes.length/2);
+      console.log(nodes.length / 2);
       let simulation = d3
         .forceSimulation()
         .force("center", d3.forceCenter(width / 2, height / 2))
@@ -838,7 +855,7 @@ export default {
             .id(function(d) {
               return d.id;
             })
-            // .distance(60)
+          // .distance(60)
         )
         .alphaTarget(0)
         .alphaDecay(0.05);
@@ -1529,7 +1546,7 @@ export default {
       return promise;
     },
     scenePanelShow(info) {
-      this.scenePanelTitle = "Scenes of "+info.title
+      this.scenePanelTitle = "Scenes of " + info.title;
       this.scenePanelVisible = true;
       if (this.scenePanelInfo.currentId !== info.id) {
         this.scenePanelInfo.page = 1;
@@ -1626,7 +1643,8 @@ export default {
 .toolPanel {
   position: absolute;
   width: 300px;
-  background: #f9fafc;
+  /* background: #f9fafc; */
+  background: transparent;
   left: 20px;
   top: 20px;
   padding: 10px;
@@ -1643,7 +1661,10 @@ export default {
   height: 100%;
   bottom: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.3);
+  /* background: rgba(0, 0, 0, 0.3); */
+  background: transparent;
+  padding-top: 10px;
+  border-top: 1px solid #ffffff;
   z-index: 899;
   transition: height 2.5s;
 }
@@ -1654,6 +1675,7 @@ export default {
 
 #d3Canvas {
   width: 100%;
+  background: #333333;
 }
 
 #rightPanel {
@@ -1770,9 +1792,11 @@ export default {
   width: 150px;
   padding: 10px;
   font-size: 14px;
-  border: 1px dashed #333333;
-  background: #f9fafc;
+  border: 1px dashed #999;
+  /* background: #f9fafc; */
+  background: transparent;
   z-index: 901;
+  color: #999;
 }
 
 .legendPanel .legend {
