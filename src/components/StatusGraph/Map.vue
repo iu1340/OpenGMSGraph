@@ -157,6 +157,8 @@ export default {
         opacity: 1,
         fillOpacity: 0.8
       };
+      // console.log(JSON.stringify(this.locationGeojson))
+      console.log(JSON.stringify(this.locationOfModel))
       for (let obj of this.locationGeojson) {
         if (GJV.valid(obj.geojson)) {
           let weight = 0.3;
@@ -165,7 +167,7 @@ export default {
             let location = this.locationOfModel[i];
             if (location.id === obj.id) {
               let weight = this.getWeight(location.count);
-              
+
               currentColor = that.color[weight-3];
               weight = weight / 10;
               break;
@@ -245,13 +247,13 @@ export default {
           }
           context.strokeStyle = currentColor;
           context.fillStyle = currentColor;
-          
+
           // console.log(obj);
           geoGenerator({
             type: "FeatureCollection",
             features: [{ type: "Feature", geometry: obj.geojson }]
           });
-          
+
           context.stroke();
           // if (obj.geojson.type==="Polygon") {
           //   context.fill();

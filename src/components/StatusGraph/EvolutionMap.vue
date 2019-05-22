@@ -1,7 +1,7 @@
 <!-- Map -->
 <template>
   <div class="main">
-    <div id="title">
+    <div id="title" v-if="type==='model'">
       <i
         class="fa fa-angle-left"
         @click="pre"
@@ -12,8 +12,9 @@
         @click="next"
       ></i>
     </div>
-    <div id="vue-leaflet">
+    <div id="vue-leaflet" v-if="type==='model'">
     </div>
+    <iframe id="iframe" src="http://127.0.0.1:5511/researcher-qianxi/examples/index3.html" v-if="type==='researcher'"></iframe>
   </div>
 </template>
 
@@ -58,7 +59,11 @@ export default {
   computed: {},
 
   mounted: function() {
-    this.getStatusInfo();
+    if (this.type === "model") {
+      this.getStatusInfo();
+    }else{
+
+    }
   },
 
   methods: {
@@ -139,7 +144,7 @@ export default {
       document.getElementById("vue-leaflet").remove(true);
       let mapDom = document.createElement("div");
       mapDom.id = "vue-leaflet";
-      document.getElementsByClassName("main")[0].appendChild(mapDom)
+      document.getElementsByClassName("main")[0].appendChild(mapDom);
       this.map = null;
       let that = this;
       this.map = L.map("vue-leaflet").setView([0, 0], 2);
@@ -381,10 +386,13 @@ export default {
 .leaflet-control-container {
   display: none;
 }
-#vue-leaflet {
+#vue-leaflet,#iframe {
   height: 100%;
   width: 100%;
   position: relative;
   background: #ffffff;
+}
+#iframe{
+  border: none;
 }
 </style>

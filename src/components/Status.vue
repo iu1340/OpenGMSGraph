@@ -234,9 +234,15 @@
                 :plain="btnActive!='evolution'"
                 @click="graphDirectionHandle('evolution')" style="width:140px"
               >Spatial Evolution</el-button>
+              <el-button
+                type="primary"
+                :plain="btnActive!='event2'"
+                @click="graphDirectionHandle('event2')" style="width:140px"
+              >Event Related</el-button>
             </div>
             <status-evolution v-if="btnActive=='evolution'"  :id="id"
             :type="type"></status-evolution>
+            <iframe v-if="btnActive==='event2'" style="width:100%;height:100%;border:0" src="http://127.0.0.1:5511/bubble.html"></iframe>
           </div>
         </template>
         <template v-if="graphActive==='used'">
@@ -389,7 +395,7 @@ export default {
               }
               that.basicInfo.keywords = keywords;
 
-              //that.createFlowchart();
+              // that.createFlowchart();
               that.createStatusChart();
             } else {
               that.$message.error("找不到条目");
@@ -521,6 +527,9 @@ export default {
       if (direction === "packing") {
         this.createStatusChart();
       }else if(direction === "evolution") {
+        $("#status-flow-chart svg").remove();
+      }
+      else if(direction === "event2") {
         $("#status-flow-chart svg").remove();
       }
       else {

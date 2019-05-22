@@ -170,6 +170,7 @@ export default {
         this.historyGraph.showLoading();
       }
       Promise.all(promises).then(function(result) {
+        console.log(JSON.stringify(result))
         for (let obj of result) {
           seriesData.push(obj.count);
         }
@@ -283,7 +284,7 @@ export default {
       );
       this.countryGraph.showLoading();
       Promise.all(promises).then(result => {
-        console.log(result)
+        console.log(JSON.stringify(result))
         let max = 0;
         for (let i = 0; i < result.length; i++) {
           let data = result[i];
@@ -298,7 +299,7 @@ export default {
         for (let i = 0; i < result.length; i++) {
           let data = result[i];
           // if (Object.keys(data).length > 0) {
-            
+
           // }
           let countryValue = [];
             for (let j = 0; j < countries.length; j++) {
@@ -312,7 +313,7 @@ export default {
               }
               countryValue.push(obj);
             }
-            
+
             let currentYearOption = {
               visualMap: {
                 left: "right",
